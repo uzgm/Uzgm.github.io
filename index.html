@@ -8,82 +8,46 @@
       margin: 0;
       height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       background: linear-gradient(135deg, #74ebd5, #ACB6E5);
       font-family: 'Segoe UI', sans-serif;
+      text-align: center;
     }
 
     h1 {
-      position: absolute;
-      top: 15%;
-      width: 100%;
-      text-align: center;
-      font-size: 2.5em;
+      font-size: 2em;
       color: #fff;
+      margin-bottom: 30px;
       text-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      animation: fadeIn 2s ease;
     }
 
-    a button {
+    a {
+      text-decoration: none;
+    }
+
+    .btn {
+      display: inline-block;
       background: linear-gradient(90deg, #ff9a9e, #fad0c4);
-      border: none;
-      padding: 18px 50px;
+      padding: 15px 40px;
       font-size: 1.2em;
       font-weight: bold;
       color: #333;
       border-radius: 40px;
-      cursor: pointer;
       box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-      transition: all 0.4s ease;
-      animation: float 3s ease-in-out infinite;
+      transition: all 0.3s ease;
     }
 
-    a button:hover {
+    .btn:hover {
       background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-      100% { transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <h1>🌸 다운로드 및 실행 🌸</h1>
-  <a href="Mult_search_engine.html" download>
-    <button>다운로드 및 실행</button>
-  </a>
-</body>
-</html>    a button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.5);
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-  </style>
-</head>
-<body>
-  <h1>🚀 다운로드 및 실행</h1>
-  <a href="Mult_search_engine.html" download>
-    <button>✨ 다운로드 및 실행 ✨</button>
-  </a>
+  <a href="Mult_search_engine.html" download class="btn">다운로드 및 실행</a>
 </body>
 </html>
