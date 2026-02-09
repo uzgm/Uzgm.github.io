@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>게임 다운로드</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
+      padding: 20px 50px;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+      border-radius: 40px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- 게임 다운로드 버튼 하나만 -->
+  <a href="game.zip" download class="btn">게임 다운로드</a>
+</body>
+</html>
