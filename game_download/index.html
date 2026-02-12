@@ -1,1 +1,57 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>게임 다운로드</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    }
+    p {
+      font-size: 1.2em;
+      margin-bottom: 40px;
+    }
+    .download-btn {
+      display: inline-block;
+      padding: 15px 30px;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #fff;
+      background: #ff6f61;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background 0.3s;
+    }
+    .download-btn:hover {
+      background: #ff3b2e;
+      transform: scale(1.05);
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 게임 다운로드</h1>
+  <p>아래 버튼을 눌러 최신 버전을 다운로드하세요!</p>
+  <!-- 실제 게임 파일 경로를 href에 넣으세요 -->
+  <a class="download-btn" href="game.zip" download>⬇️ 다운로드</a>
+  
+  <footer>
+    © 2026 MyGame Studio
+  </footer>
+</body>
+</html>
