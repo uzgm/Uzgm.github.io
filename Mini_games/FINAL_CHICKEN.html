@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🐥 FINAL CHICKENS "tantrum" </title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@700&display=swap');
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: #000; color: #fff; font-family: 'Nanum Gothic Coding', monospace; margin: 0; padding: 0; overflow: hidden; height: 100vh; width: 100vw; }
+    .ff-box { background: linear-gradient(to bottom, #00008b, #000033); border: 2px solid #eee; border-radius: 5px; padding: 8px; }
+    #game-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+
+    /* 전장 */
+    #battle-field { height: 40vh; position: relative; background: linear-gradient(#1a2a6c, #000); display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; border-bottom: 3px solid #fff; }
+    .shake { animation: shakeAnim 0.2s; }
+    @keyframes shakeAnim { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(5px,5px); } 50% { transform: translate(-5px,-5px); } 75% { transform: translate(5px,-5px); } }
+
+    .sprite { font-size: 60px; transition: 0.2s; position: relative; }
+    .player-side { transform: scaleX(-1); }
+    .active-unit { filter: drop-shadow(0 0 15px #fff) scaleX(-1.2) translateY(-10px) !important; }
+    .target-unit { filter: drop-shadow(0 0 15px #ff4444); animation: blink 0.4s infinite; }
+    @keyframes blink { 50% { opacity: 0.4; } }
+
+    /* UI 영역 */
+    #ui-area { height: 60vh; background: #000; display: flex; flex-direction: column; padding: 5px; gap: 5px; }
+    #status-bar { display: flex; gap: 5px; height: 100px; }
+    .status-window { flex: 1; font-size: 11px; }
+    .bar-bg { width: 100%; background: #333; height: 6px; margin: 2px 0; border-radius: 3px; }
+    .hp-fill { height: 100%; background: #0f0; transition: 0.3s; }
+    .mp-fill { height: 100%; background: #0af; transition: 0.3s; }
+
+    #command-bar { display: flex; gap: 5px; flex: 1; overflow: hidden; }
+    #menu-container { flex: 1.5; position: relative; display: flex; align-items: center; overflow: hidden; }
+    #menu-list { display: flex; transition: 0.3s; height: 100%; width: 100%; }
+    .menu-page { min-width: 100%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 5px; padding: 2px; }
+    
+    .nav-btn { position: absolute; z-index: 20; background: rgba(0,0,139,0.9); color: white; border: 1px solid #fff; padding: 12px 6px; cursor: pointer; }
+    #log-window { flex: 1; font-size: 11px; overflow-y: auto; background: rgba(0,0,50,0.5); }
+    
+    button.skill-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid #444; font-size: 11px; cursor: pointer; }
+    button.ult-btn { border-color: #ff0; color: #ff0; }
+    button:disabled { opacity: 0.3; }
+
+    .damage-pop { position: absolute; font-weight: bold; text-shadow: 2px 2px #000; animation: floatUp 0.8s forwards; z-index: 100; pointer-events: none; }
+    @keyframes floatUp { from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-60px);} }
+
+    #select-screen { position: absolute; inset: 0; background: #000; z-index: 2000; padding: 15px; display: flex; flex-direction: column; }
+    .char-item { margin-bottom: 5px; padding: 10px; cursor: pointer; border: 2px solid #444; }
+    .selected { border-color: #ff0; background: #111; }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <div id="select-screen">
+    <h2 style="color: #ffeb3b; text-align: center;">🛡️ 원정대 결성 (2인) ⚔️</h2>
+    <div id="char-list" style="flex:1; overflow-y:auto;"></div>
+    <button id="start-btn" class="ff-box" style="width:100%; color:white; display:none; padding:15px;" onclick="startBattle()">전투 개시</button>
+  </div>
+
+  <div id="battle-field">
+    <div class="unit-container" id="player-party"></div>
+    <div class="unit-container" id="enemy-party"></div>
+  </div>
+
+  <div id="ui-area">
+    <div id="status-bar">
+      <div id="p1-status" class="ff-box status-window"></div>
+      <div id="p2-status" class="ff-box status-window"></div>
+    </div>
+    <div class="ff-box" style="display:flex; justify-content:space-between; font-size:12px; align-items:center;">
+      <span>🎒 물약: <b id="pot-count">3</b>개</span>
+      <button class="ff-box" id="use-pot-btn" style="color:white; cursor:pointer;" onclick="usePotion()">물약 사용(HP+150)</button>
+    </div>
+    <div id="command-bar">
+      <div id="menu-container" class="ff-box">
+        <button class="nav-btn" style="left:0" onclick="movePage(-1)">◀</button>
+        <div id="menu-list"></div>
+        <button class="nav-btn" style="right:0" onclick="movePage(1)">▶</button>
+      </div>
+      <div id="log-window" class="ff-box"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 캐릭터 데이터 정의
+  const charDB = [
+    { name:"기사 병아리", img:"🐥", hp:250, mp:100, atk:30, skills:[
+        {n:"평타",p:1,m:0}, {n:"방패찍기",p:1.4,m:15}, {n:"박치기",p:1.5,m:20}, 
+        {n:"필살: 대참격",p:3.0,m:40}, {n:"필살: 근육폭발",p:3.5,m:50}, {n:"궁극: 황금계란",p:7.0,m:100,u:true}
+    ]},
+    { name:"법사 펭귄", img:"🐧", hp:160, mp:150, atk:55, skills:[
+        {n:"매직샷",p:1,m:0}, {n:"파이어",p:2.2,m:25}, {n:"아이스",p:2.2,m:25}, 
+        {n:"필살: 메테오",p:4.5,m:60}, {n:"필살: 썬더가",p:5.0,m:70}, {n:"궁극: 알테마",p:9.0,m:150,u:true}
+    ]},
+    { name:"독수리 몽크", img:"🦅", hp:200, mp:100, atk:45, skills:[
+        {n:"쨉",p:1.1,m:0}, {n:"연속차기",p:1.8,m:20}, {n:"승룡권",p:2.0,m:25}, 
+        {n:"필살: 아수라",p:4.2,m:50}, {n:"필살: 폭풍각",p:4.8,m:65}, {n:"궁극: 일격필살",p:8.0,m:100,u:true}
+    ]},
+    { name:"참새 닌자", img:"🐦", hp:180, mp:110, atk:40, skills:[
+        {n:"부리",p:1,m:0}, {n:"그림자",p:2.0,m:25}, {n:"독침",p:1.6,m:15}, 
+        {n:"필살: 암살",p:4.5,m:55}, {n:"필살: 분신술",p:5.0,m:70}, {n:"궁극: 천수각",p:7.5,m:110,u:true}
+    ]},
+    { name:"부엉이 신선", img:"🦉", hp:200, mp:130, atk:35, skills:[
+        {n:"바람",p:1,m:0}, {n:"회오리",p:2.2,m:30}, {n:"지진",p:2.0,m:28}, 
+        {n:"필살: 태풍",p:4.0,m:50}, {n:"필살: 신의눈",p:5.0,m:75}, {n:"궁극: 지혜의빛",p:8.5,m:130,u:true}
+    ]}
+  ];
+
+  let myParty=[], enemies=[], selectedIds=[], turnIdx=0, stage=1, curPage=0, currentSkill=null, potionCount=3;
+
+  // 1. 캐릭터 선택창 초기화
+  const listEl = document.getElementById('char-list');
+  charDB.forEach((c, i) => {
+    const d = document.createElement('div'); d.className = 'char-item ff-box';
+    d.innerHTML = `<b>${c.img} ${c.name}</b><br>HP:${c.hp} MP:${c.mp} ATK:${c.atk}`;
+    d.onclick = () => {
+      if(selectedIds.includes(i)) { selectedIds=selectedIds.filter(v=>v!==i); d.classList.remove('selected'); }
+      else if(selectedIds.length<2) { selectedIds.push(i); d.classList.add('selected'); }
+      document.getElementById('start-btn').style.display = selectedIds.length===2?'block':'none';
+    };
+    listEl.appendChild(d);
+  });
+
+  function startBattle() {
+    myParty = selectedIds.map(id => ({...charDB[id], curHp:charDB[id].hp, curMp:charDB[id].mp, side:'p'}));
+    document.getElementById('select-screen').style.display = 'none';
+    loadStage();
+  }
+
+  function loadStage() {
+    enemies = [];
+    const eImgs = ["🐔","🦆","🦃","🦢","🦖"];
+    for(let i=0; i<2; i++) {
+      let hp = 100+(stage*70);
+      enemies.push({ name:`Lv.${stage} 적`, img:eImgs[Math.min(stage-1,4)], hp:hp, curHp:hp, atk:15+(stage*8), side:'e', id:i });
+    }
+    renderSprites(); updateUI(); log(`--- STAGE ${stage} 시작 ---`); nextTurn();
+  }
+
+  function renderSprites() {
+    const pBox=document.getElementById('player-party'), eBox=document.getElementById('enemy-party');
+    pBox.innerHTML=''; eBox.innerHTML='';
+    myParty.forEach((m,i)=>{
+      const s=document.createElement('div'); s.className='sprite player-side'; s.id=`p-${i}`; s.innerText=m.img;
+      pBox.appendChild(s);
+    });
+    enemies.forEach((m,i)=>{
+      const s=document.createElement('div'); s.className='sprite'; s.id=`e-${i}`; s.innerText=m.img;
+      s.onclick=()=>{ if(currentSkill) attackTarget(m); };
+      eBox.appendChild(s);
+    });
+  }
+
+  function nextTurn() {
+    if(checkEnd()) return;
+    const units=[...myParty, ...enemies];
+    const unit=units[turnIdx % units.length];
+    document.querySelectorAll('.sprite').forEach(s=>s.classList.remove('active-unit'));
+    if(unit.curHp<=0) { turnIdx++; nextTurn(); return; }
+
+    const sId = unit.side==='p'?`p-${myParty.indexOf(unit)}`:`e-${enemies.indexOf(unit)}`;
+    document.getElementById(sId).classList.add('active-unit');
+
+    if(unit.side==='e') setTimeout(()=>enemyAI(unit), 1000);
+    else { unit.curMp=Math.min(unit.mp, unit.curMp+10); updateUI(); showSkillPages(unit); }
+  }
+
+  function showSkillPages(unit) {
+    const list=document.getElementById('menu-list'); list.innerHTML=''; curPage=0; list.style.transform='translateX(0)';
+    // 6개의 스킬을 4개씩 나눠서 2페이지로 구성
+    for(let i=0; i<unit.skills.length; i+=4) {
+      const page=document.createElement('div'); page.className='menu-page';
+      unit.skills.slice(i, i+4).forEach(s=>{
+        const btn=document.createElement('button'); 
+        btn.className=`skill-btn ff-box ${s.u?'ult-btn':''}`;
+        btn.innerHTML=`${s.n}<br><small>MP:${s.m}</small>`;
+        btn.disabled=unit.curMp<s.m; btn.onclick=()=>selectSkill(s, unit);
+        page.appendChild(btn);
+      });
+      list.appendChild(page);
+    }
+    document.getElementById('use-pot-btn').disabled = false;
+  }
+
+  function selectSkill(s, unit) {
+    currentSkill=s; log(`대상을 선택! [${s.n}]`); 
+    document.querySelectorAll('#enemy-party .sprite').forEach(el=>{ if(enemies[el.id.split('-')[1]].curHp>0) el.classList.add('target-unit'); });
+  }
+
+  function attackTarget(target) {
+    const attacker = [...myParty, ...enemies][turnIdx % (myParty.length+enemies.length)];
+    attacker.curMp -= currentSkill.m;
+    
+    let dmg = Math.floor(attacker.atk * currentSkill.p * (0.9+Math.random()*0.3));
+    
+    // 공격 애니메이션
+    const sId = `p-${myParty.indexOf(attacker)}`;
+    document.getElementById(sId).classList.add('shake');
+    document.getElementById('battle-field').classList.add('shake');
+    setTimeout(()=> { document.querySelectorAll('.shake').forEach(el=>el.classList.remove('shake')); }, 200);
+
+    target.curHp=Math.max(0, target.curHp-dmg);
+    showPop(target, dmg, currentSkill.u?"#ff0":"#fff", currentSkill.u?50:30);
+    log(`${attacker.name}의 ${currentSkill.n}! ${dmg} 피해!`);
+    
+    currentSkill=null; document.querySelectorAll('.sprite').forEach(s=>s.classList.remove('target-unit'));
+    finishTurn();
+  }
+
+  function usePotion() {
+    const unit = myParty[turnIdx % (myParty.length+enemies.length)];
+    if(potionCount > 0 && unit.side === 'p') {
+      potionCount--; unit.curHp = Math.min(unit.hp, unit.curHp + 150);
+      document.getElementById('pot-count').innerText = potionCount;
+      log(`포션 사용! ${unit.name} HP 150 회복!`);
+      showPop(unit, 150, "#0f0", 35); updateUI();
+      document.getElementById('use-pot-btn').disabled = true;
+    }
+  }
+
+  function enemyAI(unit) {
+    const targets=myParty.filter(p=>p.curHp>0); const target=targets[Math.floor(Math.random()*targets.length)];
+    let dmg=Math.floor(unit.atk*(0.8+Math.random()*0.4));
+    target.curHp=Math.max(0, target.curHp-dmg); showPop(target, dmg, "#f55", 30);
+    log(`${unit.name}의 반격! ${dmg} 피해!`); finishTurn();
+  }
+
+  function finishTurn() { turnIdx++; updateUI(); setTimeout(nextTurn, 700); }
+
+  function updateUI() {
+    myParty.forEach((m,i)=>{
+      const hP=(m.curHp/m.hp)*100, mP=(m.curMp/m.mp)*100;
+      document.getElementById(`p${i+1}-status`).innerHTML=`<b>${m.name}</b><br>HP:${m.curHp}/${m.hp}<div class="bar-bg"><div class="hp-fill" style="width:${hP}%"></div></div>MP:${m.curMp}/${m.mp}<div class="bar-bg"><div class="mp-fill" style="width:${mP}%"></div></div>`;
+      document.getElementById(`p-${i}`).style.opacity=m.curHp<=0?'0.2':'1';
+    });
+    enemies.forEach((m,i)=>{ document.getElementById(`e-${i}`).style.opacity=m.curHp<=0?'0':'1'; });
+  }
+
+  function showPop(u,v,c,s) {
+    const id=u.side==='p'?`p-${myParty.indexOf(u)}`:`e-${enemies.indexOf(u)}`;
+    const r=document.getElementById(id).getBoundingClientRect();
+    const p=document.createElement('div'); p.className='damage-pop'; p.innerText=v; p.style.color=c; p.style.fontSize=s+'px';
+    p.style.left=r.left+'px'; p.style.top=r.top+'px'; document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 800);
+  }
+
+  function movePage(d) {
+    const list=document.getElementById('menu-list'); const total=list.children.length;
+    curPage=(curPage+d+total)%total; list.style.transform=`translateX(-${curPage*100}%)`;
+  }
+
+  function log(m) { const win=document.getElementById('log-window'); win.innerHTML+=`> ${m}<br>`; win.scrollTop=win.scrollHeight; }
+
+  function checkEnd() {
+    if(myParty.every(p=>p.curHp<=0)) { alert("전멸..."); location.reload(); return true; }
+    if(enemies.every(e=>e.curHp<=0)) { 
+      stage++; alert("스테이지 클리어! 물약 보급!"); potionCount++; document.getElementById('pot-count').innerText = potionCount;
+      myParty.forEach(p=>{ p.hp+=40; p.atk+=6; p.curHp=p.hp; p.curMp=p.mp; });
+      turnIdx=0; loadStage(); return true; 
+    }
+    return false;
+  }
+</script>
+</body>
+</html>
