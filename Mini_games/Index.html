@@ -10,6 +10,7 @@
       color: #fff;
       text-align: center;
       padding: 50px;
+      margin: 0;
     }
     h1 {
       font-size: 3em;
@@ -42,17 +43,33 @@
       font-size: 0.9em;
       opacity: 0.8;
     }
+    /* 모바일 대응 */
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      .download-btn {
+        width: 100%;
+        font-size: 1.2em;
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>🎮 미니_게임하기</h1>
+  <h1>🎮 미니 게임하기</h1>
   <p>아래 버튼을 눌러 미니게임을 플레이하세요!</p>
+  
   <!-- 실제 게임 파일 경로를 href에 넣으세요 -->
-  <a class="download-btn" href="Soccer_minigame.html" class>⬇️ 축구미니게임하기</a>
+  <a class="download-btn" href="Soccer_minigame.html" aria-label="축구 미니게임 시작하기">
+    ⚽️ 축구 미니게임하기
+  </a>
   
   <footer>
     © 2026 zgm Studio
   </footer>
 </body>
 </html>
-
