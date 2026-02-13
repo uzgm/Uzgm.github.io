@@ -2,58 +2,127 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Beta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>댕댕 모듈형 Beta</title>
   <style>
+    /* 1. 디자인 시스템 변수 (여기만 바꾸면 전체 색감이 변함!) */
+    :root {
+      --bg-color: #f9f3ee;          /* 배경 크림색 */
+      --point-brown: #c9b4a1;       /* 인형 털 색상 */
+      --text-main: #5d4037;         /* 메인 글자색 */
+      --nose-black: #1a1a1a;        /* 인형 코 버튼색 */
+      --card-bg: rgba(255, 255, 255, 0.7);
+    }
+
+    /* 2. 전체 레이아웃 */
     body {
       margin: 0;
-      height: 100vh;
+      padding: 50px 20px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
-      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      font-family: 'Pretendard', sans-serif;
+      gap: 30px; /* 모듈 간의 간격 */
+    }
+
+    /* 3. 공통 모듈: 댕댕이 카드 */
+    .dog-card {
+      width: 100%;
+      max-width: 450px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      padding: 40px 20px;
+      border-radius: 50px;
+      border: 5px solid var(--point-brown);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.05);
       text-align: center;
+      transition: transform 0.3s ease;
     }
 
-    h1 {
-      font-size: 2em;
-      color: #fff;
-      margin-bottom: 30px;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    .dog-card:hover {
+      transform: translateY(-10px); /* 살짝 들리는 효과 */
     }
 
-    a {
-      text-decoration: none;
-      margin: 10px;
+    /* 4. 카드 내부 구성 요소 */
+    .face-deco {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 15px;
     }
 
-    .btn {
+    .eye {
+      width: 15px;
+      height: 15px;
+      background: #333;
+      border-radius: 50%;
+    }
+
+    .title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--text-main);
+      margin: 10px 0;
+    }
+
+    .badge {
       display: inline-block;
-      background: linear-gradient(90deg, #ff9a9e, #fad0c4);
-      padding: 15px 40px;
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #333;
-      border-radius: 40px;
-      box-shadow: 0 6px 15px rgba(4,0,0,0.2);
-      transition: all 0.3s ease;
+      padding: 5px 12px;
+      background: var(--point-brown);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-bottom: 25px;
     }
 
-    .btn:hover {
-      background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    /* 5. 버튼 모듈 (코) */
+    .nose-btn {
+      display: inline-block;
+      text-decoration: none;
+      background: var(--nose-black);
+      color: white;
+      padding: 15px 40px;
+      font-weight: bold;
+      border-radius: 40px;
+      box-shadow: 0 6px 0 #000;
+      transition: all 0.2s;
+    }
+
+    .nose-btn:hover {
+      background: #333;
+      transform: scale(1.05);
+    }
+
+    .nose-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #000;
     }
   </style>
 </head>
 <body>
-  <h1> 사이트beta </h1>
-  <!-- 기존 버튼 -->
-  <a href="game_download/index.html" class="btn">다운로드 및 실행</a>
-  
-  <h1> 사이트beta2 </h1>
-  <!-- 기존 버튼 -->
-  <a href="game_download/index.html" class="btn">다운로드 및 실행</a>
-</body>
+
+  <article class="dog-card">
+    <div class="face-deco">
+      <div class="eye"></div>
+      <div class="eye"></div>
+    </div>
+    <h1 class="title">게임 다운로드 하러가기 </h1>
+    <span class="badge">#v1.0 #초코맛</span>
+    <br>
+    <a href="game_download/index.html" class="nose-btn">다운로드하러가기</a>
+  </article>
+
+  <article class="dog-card">
+    <div class="face-deco">
+      <div class="eye"></div>
+      <div class="eye"></div>
+    </div>
+    <h1 class="title">사이트 beta 2</h1>
+    <span class="badge">#v2.0 #바닐라맛</span>
+    <br>
+    <a href="game_download/index.html" class="nose-btn">다운로드 및 실행</a>
+  </article>
+
+  </body>
 </html>
