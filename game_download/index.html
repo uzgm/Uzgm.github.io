@@ -2,56 +2,124 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>게임 다운로드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zgm Studio - Download</title>
   <style>
+    :root {
+      --bg: #f9f3ee;
+      --dog-brown: #c9b4a1;
+      --nose-black: #1a1a1a;
+      --point-red: #ff6f61; /* 선물상자 리본 색상 */
+    }
+
     body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      color: #fff;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: var(--bg);
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    /* 선물 상자 모듈 */
+    .download-box {
+      width: 90%;
+      max-width: 450px;
+      background: white;
+      border: 6px solid var(--dog-brown);
+      border-radius: 60px;
+      padding: 60px 30px;
       text-align: center;
-      padding: 50px;
+      box-shadow: 0 30px 60px rgba(165, 140, 120, 0.2);
+      position: relative;
     }
-    h1 {
-      font-size: 3em;
+
+    /* 댕댕이 귀 (데코레이션) */
+    .download-box::before, .download-box::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      width: 80px; height: 100px;
+      background: var(--dog-brown);
+      border-radius: 50% 50% 10% 10%;
+      z-index: -1;
+    }
+    .download-box::before { left: 40px; transform: rotate(-20deg); }
+    .download-box::after { right: 40px; transform: rotate(20deg); }
+
+    .icon-area {
+      font-size: 5rem;
       margin-bottom: 20px;
-      text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+      animation: bounce 2s infinite;
     }
-    p {
-      font-size: 1.2em;
+
+    h1 {
+      color: #5d4037;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .info-text {
+      color: #a1887f;
       margin-bottom: 40px;
+      line-height: 1.6;
     }
+
+    /* 이번엔 빨간 리본이 달린 코 버튼! */
     .download-btn {
       display: inline-block;
-      padding: 15px 30px;
-      font-size: 1.5em;
-      font-weight: bold;
-      color: #fff;
-      background: #ff6f61;
-      border: none;
-      border-radius: 8px;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: transform 0.2s, background 0.3s;
+      background: var(--nose-black);
+      color: white;
+      padding: 22px 50px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      border-radius: 100px;
+      box-shadow: 0 10px 0 #000;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
     .download-btn:hover {
-      background: #ff3b2e;
-      transform: scale(1.05);
+      background: var(--point-red);
+      transform: scale(1.1);
+      box-shadow: 0 5px 0 #b33939;
     }
+
+    .download-btn:active {
+      transform: translateY(8px);
+      box-shadow: 0 0px 0 #b33939;
+    }
+
     footer {
-      margin-top: 50px;
-      font-size: 0.9em;
-      opacity: 0.8;
+      position: absolute;
+      bottom: -60px;
+      left: 0; right: 0;
+      font-size: 0.9rem;
+      color: var(--dog-brown);
+      font-weight: bold;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
     }
   </style>
 </head>
 <body>
-  <h1>🎮 게임 다운로드</h1>
-  <p>아래 버튼을 눌러 최신 버전을 다운로드하세요!</p>
-  <!-- 실제 게임 파일 경로를 href에 넣으세요 -->
-  <a class="download-btn" href="game.zip" download>⬇️ 다운로드</a>
-  
-  <footer>
-    © 2026 zgm Studio
-  </footer>
+
+  <div class="download-box">
+    <div class="icon-area">📦</div>
+    <h1>파일 준비 완료!</h1>
+    <p class="info-text">
+      댕댕이가 정성껏 압축했어요.<br>
+      아래 버튼을 눌러 보물을 받아가개!
+    </p>
+    
+    <a class="download-btn" href="game.zip" download>
+      ⬇️ 지금 받기
+    </a>
+
+    <footer>© 2026 zgm Studio • Plush Delivery</footer>
+  </div>
+
 </body>
 </html>
