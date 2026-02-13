@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🥅 페널티킥 마스터가 되자</title>
+  <style>
+    body { background: #222; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; }
+    #stadium { 
+      position: relative; width: 600px; height: 400px; 
+      margin: 30px auto; background: #2e7d32; /* 잔디색 */
+      border: 5px solid #fff; border-radius: 10px; overflow: hidden;
+    }
+    /* 골대 */
+    #goal { 
+      position: absolute; top: 50px; left: 150px; width: 300px; height: 120px; 
+      border: 5px solid white; border-bottom: none; background: rgba(255,255,255,0.1);
+    }
+    /* 골키퍼 (왼쪽/오른쪽 주둥이 대신 장갑) */
+    #keeper { 
+      position: absolute; top: 110px; left: 275px; font-size: 50px; 
+      transition: all 0.3s ease; z-index: 10;
+    }
+    /* 축구공 */
+    #ball { 
+      position: absolute; bottom: 30px; left: 275px; font-size: 40px; 
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5;
+    }
+    .ui { margin-top: 20px; font-size: 20px; font-weight: bold; }
+    button { padding: 10px 20px; font-size: 18px; cursor: pointer; background: #ffeb3b; border: none; border-radius: 5px; font-weight: bold; }
+    #msg { font-size: 24px; margin: 10px; height: 30px; }
+  </style>
+</head>
+<body>
+  <h1>⚽ 페널티킥 마스터</h1>
+  <div id="stadium">
+    <div id="goal"></div>
+    <div id="keeper">🧤</div>
+    <div id="ball">⚽</div>
+  </div>
+  
+  <div id="msg">방향을 선택해서 슛을 날리세요!</div>
+  
+  <div class="ui">
+    <button onclick="shoot('left')">왼쪽 슛</button>
+    <button onclick="shoot('center')">중앙 슛</button>
+    <button onclick="shoot('right')">오른쪽 슛</button>
+  </div>
+  
+  <div class="ui">
+    SCORE: <span id="score">0</span> | BEST: <span id="highscore">0</span>
+  </div>
+
+  <script>
+    const ball = document.getElementById("ball");
+    const keeper = document.getElementById("keeper");
+    const msg = document.getElementById("msg");
+    const scoreEl = document.getElementById("score");
+    
+    let score = 0;
+    let highscore = localStorage.getItem("pkHighscore") || 0;
+    document.getElementById("highscore").innerText = highscore;
+    let isShooting = false;
+
+    function shoot(direction) {
+      if (isShooting) return;
+      isShooting = true;
+
+      // 1. 골키퍼의 랜덤 방어 방향 (left, center, right)
+      const directions = ['left', 'center', 'right'];
+      const keeperChoice = directions[Math.floor(Math.random() * 3)];
+
+      // 2. 골키퍼 이동
+      if (keeperChoice === 'left') keeper.style.left = "160px";
+      else if (keeperChoice === 'center') keeper.style.left = "275px";
+      else keeper.style.left = "390px";
+
+      // 3. 공 이동
+      ball.style.bottom = "230px"; // 골대 높이까지
+      if (direction === 'left') ball.style.left = "160px";
+      else if (direction === 'center') ball.style.left = "275px";
+      else ball.style.left = "390px";
+
+      // 4. 결과 판정
+      setTimeout(() => {
+        if (direction === keeperChoice) {
+          msg.innerText = "🧤 키퍼의 슈퍼 세이브! (실패)";
+          msg.style.color = "#ff5252";
+          score = 0; // 페널티킥은 원래 연속 성공이 중요!
+        } else {
+          msg.innerText = "⚽ GOAL!!! 찢었다!!";
+          msg.style.color = "#4caf50";
+          score++;
+          if (score > highscore) {
+            highscore = score;
+            localStorage.setItem("pkHighscore", highscore);
+            document.getElementById("highscore").innerText = highscore;
+          }
+        }
+        scoreEl.innerText = score;
+
+        // 5. 초기화 (1초 뒤)
+        setTimeout(resetPosition, 1000);
+      }, 500);
+    }
+
+    function resetPosition() {
+      ball.style.bottom = "30px";
+      ball.style.left = "275px";
+      keeper.style.left = "275px";
+      msg.innerText = "다음 슛을 준비하세요!";
+      msg.style.color = "white";
+      isShooting = false;
+    }
+  </script>
+</body>
+</html>
