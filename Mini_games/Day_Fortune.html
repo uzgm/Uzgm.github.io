@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zgm Fortune Center</title>
+    <style>
+        :root {
+            --bg: #f8f9fa; --card: #ffffff; --text: #333;
+            --party: #ffeb3b; --rank: #00f2fe; --general: #a5d6a7;
+        }
+        body {
+            margin: 0; background: var(--bg); color: var(--text);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
+        .header-section { text-align: center; margin-bottom: 30px; }
+        .title { font-weight: 900; font-size: 2.2rem; margin: 0; }
+        .sub-title { color: #888; margin-top: 10px; }
+
+        .fortune-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; width: 100%; max-width: 1100px;
+        }
+
+        .card {
+            background: var(--card); border-radius: 35px; padding: 35px;
+            text-align: center; border: 5px solid #eee; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08); transition: 0.3s;
+        }
+        /* 각 카드별 고유 테두리색 */
+        .card.general { border-color: var(--general); }
+        .card.party { border-color: var(--party); }
+        .card.rank { border-color: var(--rank); }
+
+        .icon { font-size: 4.5rem; display: block; margin-bottom: 20px; }
+        
+        /* 킹받는 흔들기 애니메이션 */
+        .shake { animation: shake 0.5s infinite ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(12deg); }
+            75% { transform: rotate(-12deg); }
+        }
+
+        .fortune-text { 
+            font-weight: 800; font-size: 1.1rem; min-height: 60px; 
+            margin-bottom: 25px; color: #444; line-height: 1.5;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .btn-draw {
+            width: 100%; padding: 18px; border: none; border-radius: 20px;
+            font-weight: 900; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15); transition: 0.1s;
+        }
+        .btn-draw:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.15); }
+        .btn-draw:disabled { 
+            background: #e0e0e0 !important; color: #999; 
+            cursor: not-allowed; transform: none; box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h1 class="title">zgm 캡슐 복덕방 🔮</h1>
+        <p class="sub-title">모드별 일일 운세는 하루에 딱 한 번씩만! 🐾</p>
+    </div>
+
+    <div class="fortune-container">
+        <div class="card general" id="card-general">
+            <span class="icon" id="icon-general">💊</span>
+            <h3>일반 운세</h3>
+            <div class="fortune-text" id="text-general">오늘 하루를 관통할 캡슐은?</div>
+            <button class="btn-draw" style="background: var(--general);" onclick="draw('general')">운세 확인</button>
+        </div>
+
+        <div class="card party" id="card-party">
+            <span class="icon" id="icon-party">🐣</span>
+            <h3>파티 모드 운세</h3>
+            <div class="fortune-text" id="text-party">행복한 병아리가 될 수 있을까?</div>
+            <button class="btn-draw" style="background: var(--party);" onclick="draw('party')">운세 확인</button>
+        </div>
+
+        <div class="card rank" id="card-rank">
+            <span class="icon" id="icon-rank">💀</span>
+            <h3>랭크 모드 운세</h3>
+            <div class="fortune-text" id="text-rank">오늘 당신의 피지컬 점수는?</div>
+            <button class="btn-draw" style="background: var(--rank);" onclick="draw('rank')">운세 확인</button>
+        </div>
+    </div>
+
+    <script>
+        const fortunes = {
+            general: [
+                "무난한 게 최고개! 큰 탈 없는 하루가 될 거개. 🦴",
+                "예상치 못한 곳에서 간식을 발견할 운세! 🍕",
+                "오늘은 지갑 단속 잘 하개. 캡슐이 새고 있개. 💸",
+                "말조심하개! 멍멍 짖다가 오해받을 수 있개. 🤫"
+            ],
+            party: [
+                "파티의 주인공은 너개! 친구들이 널 찾을 거개. 🥳",
+                "병아리가 닭장을 뚫고 나갈 기세! 탈출 성공! 🐥",
+                "오늘의 행운 아이템: 노란색 양말 🧦",
+                "웃음이 끊이지 않는 하루! 배꼽 조심하개. 😂"
+            ],
+            rank: [
+                "에임 폭발! 지금 당장 전장으로 뛰어들개! 🎯",
+                "침착하개. 샷 한 발에 티어가 결정되개. 💀",
+                "오버로드급 피지컬! 오늘 너를 막을 자는 없개. 🔥",
+                "패배의 냄새가 나개... 오늘은 연습 모드만 하개. 🛠️"
+            ]
+        };
+
+        // 페이지 진입 시 저장된 결과 불러오기
+        window.onload = () => {
+            ['general', 'party', 'rank'].forEach(type => {
+                const savedDate = localStorage.getItem(`zgm_date_${type}`);
+                const today = new Date().toDateString();
+                
+                if (savedDate === today) {
+                    const savedResult = localStorage.getItem(`zgm_result_${type}`);
+                    document.getElementById(`text-${type}`).innerText = savedResult;
+                    const btn = document.querySelector(`#card-${type} .btn-draw`);
+                    btn.disabled = true;
+                    btn.innerText = "오늘 완료 🐾";
+                    
+                    // 아이콘도 결과용으로 고정
+                    const icon = document.getElementById(`icon-${type}`);
+                    icon.innerText = type === 'general' ? '🍀' : (type === 'party' ? '🌈' : '⚔️');
+                }
+            });
+        };
+
+        function draw(type) {
+            const icon = document.getElementById(`icon-${type}`);
+            const text = document.getElementById(`text-${type}`);
+            const btn = document.querySelector(`#card-${type} .btn-draw`);
+            
+            if (btn.disabled) return;
+
+            icon.classList.add('shake');
+            text.innerText = "캡슐을 흔드는 중...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                icon.classList.remove('shake');
+                const list = fortunes[type];
+                const result = list[Math.floor(Math.random() * list.length)];
+                
+                text.innerText = result;
+                btn.innerText = "오늘 완료 🐾";
+
+                // 아이콘 변경
+                icon.innerText = type === 'general' ? '🍀' : (type === 'party' ? '🌈' : '⚔️');
+
+                // 데이터 저장
+                const today = new Date().toDateString();
+                localStorage.setItem(`zgm_date_${type}`, today);
+                localStorage.setItem(`zgm_result_${type}`, result);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
