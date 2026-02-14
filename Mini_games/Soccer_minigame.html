@@ -2,38 +2,204 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>🥅 페널티킥 마스터가 되자</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>zgm Penalty Master</title>
   <style>
-    body { background: #222; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; }
-    #stadium { 
-      position: relative; width: 600px; height: 400px; 
-      margin: 30px auto; background: #2e7d32; /* 잔디색 */
-      border: 5px solid #fff; border-radius: 10px; overflow: hidden;
+    :root {
+      --grass: #4caf50;
+      --line: rgba(255,255,255,0.8);
+      --dog-brown: #c9b4a1;
+      --nose-black: #1a1a1a;
     }
+
+    body {
+      background: #f0ede9;
+      color: #333;
+      text-align: center;
+      font-family: 'Pretendard', sans-serif;
+      margin: 0;
+      overflow: hidden; /* 모바일 스크롤 방지 */
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* 상단 점수판 */
+    .header {
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+    .score-container { font-size: 1.2rem; font-weight: 800; color: var(--dog-brown); }
+    #score { font-size: 2rem; color: var(--nose-black); }
+
+    /* 경기장 (모바일 대응 유연한 크기) */
+    #stadium { 
+      position: relative; 
+      width: 95%; 
+      max-width: 600px; 
+      height: 350px; 
+      margin: 20px auto; 
+      background: var(--grass); 
+      border: 8px solid #fff; 
+      border-radius: 40px; 
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
     /* 골대 */
     #goal { 
-      position: absolute; top: 50px; left: 150px; width: 300px; height: 120px; 
-      border: 5px solid white; border-bottom: none; background: rgba(255,255,255,0.1);
+      position: absolute; top: 40px; left: 15%; width: 70%; height: 100px; 
+      border: 6px solid white; border-bottom: none; 
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 10px, transparent 10px, transparent 20px);
     }
-    /* 골키퍼 (왼쪽/오른쪽 주둥이 대신 장갑) */
+
+    /* 댕댕이 키퍼 (장갑 대신 이모지로 교체 가능) */
     #keeper { 
-      position: absolute; top: 110px; left: 275px; font-size: 50px; 
-      transition: all 0.3s ease; z-index: 10;
+      position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+      font-size: 60px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10;
     }
+
     /* 축구공 */
     #ball { 
-      position: absolute; bottom: 30px; left: 275px; font-size: 40px; 
-      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5;
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      font-size: 45px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 5;
     }
-    .ui { margin-top: 20px; font-size: 20px; font-weight: bold; }
-    button { padding: 10px 20px; font-size: 18px; cursor: pointer; background: #ffeb3b; border: none; border-radius: 5px; font-weight: bold; }
-    #msg { font-size: 24px; margin: 10px; height: 30px; }
+
+    /* 하단 메시지 & 컨트롤 */
+    .controls {
+      flex-grow: 1;
+      background: #fff;
+      border-top-left-radius: 40px;
+      border-top-right-radius: 40px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    #msg { font-size: 1.2rem; font-weight: 800; height: 30px; color: #8d6e63; }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button { 
+      flex: 1;
+      max-width: 120px;
+      padding: 15px 0;
+      font-size: 1rem;
+      cursor: pointer; 
+      background: var(--nose-black); 
+      color: white;
+      border: none; 
+      border-radius: 20px; 
+      font-weight: bold;
+      box-shadow: 0 5px 0 #000;
+      -webkit-tap-highlight-color: transparent; /* 모바일 터치 잔상 제거 */
+    }
+
+    button:active { transform: translateY(4px); box-shadow: 0 1px 0 #000; }
+    button:disabled { background: #ccc; box-shadow: 0 5px 0 #999; }
+
   </style>
 </head>
 <body>
-  <h1>⚽ 페널티킥 마스터</h1>
+
+  <div class="header">
+    <div class="score-container">
+      BEST: <span id="highscore">0</span><br>
+      SCORE: <span id="score">0</span>
+    </div>
+  </div>
+
   <div id="stadium">
     <div id="goal"></div>
+    <div id="keeper">🐶</div>
+    <div id="ball">⚽</div>
+  </div>
+  
+  <div class="controls">
+    <div id="msg">방향을 정해서 슛!</div>
+    <div class="btn-group">
+      <button onclick="shoot('left')">왼쪽</button>
+      <button onclick="shoot('center')">중앙</button>
+      <button onclick="shoot('right')">오른쪽</button>
+    </div>
+  </div>
+
+  <script>
+    const ball = document.getElementById("ball");
+    const keeper = document.getElementById("keeper");
+    const msg = document.getElementById("msg");
+    const scoreEl = document.getElementById("score");
+    const btns = document.querySelectorAll("button");
+    
+    let score = 0;
+    let highscore = localStorage.getItem("pkHighscore") || 0;
+    document.getElementById("highscore").innerText = highscore;
+    let isShooting = false;
+
+    function shoot(direction) {
+      if (isShooting) return;
+      isShooting = true;
+      btns.forEach(b => b.disabled = true);
+
+      // 1. 키퍼 랜덤 AI
+      const directions = ['left', 'center', 'right'];
+      const keeperChoice = directions[Math.floor(Math.random() * 3)];
+
+      // 2. 키퍼 이동 로직 (반응형 % 사용)
+      if (keeperChoice === 'left') keeper.style.left = "25%";
+      else if (keeperChoice === 'center') keeper.style.left = "50%";
+      else keeper.style.left = "75%";
+
+      // 3. 공 이동 (골대 안으로 쏙!)
+      ball.style.bottom = "210px";
+      if (direction === 'left') ball.style.left = "25%";
+      else if (direction === 'center') ball.style.left = "50%";
+      else ball.style.left = "75%";
+      ball.style.transform = "translateX(-50%) scale(0.6)"; // 멀어지는 효과
+
+      // 4. 결과 판정
+      setTimeout(() => {
+        if (direction === keeperChoice) {
+          msg.innerText = "🐶: 멍멍! 막아냈개!";
+          msg.style.color = "#ff5252";
+          score = 0;
+        } else {
+          msg.innerText = "⚽ 골!!! 오버로드급 슛!";
+          msg.style.color = "#4caf50";
+          score++;
+          if (score > highscore) {
+            highscore = score;
+            localStorage.setItem("pkHighscore", highscore);
+            document.getElementById("highscore").innerText = highscore;
+          }
+        }
+        scoreEl.innerText = score;
+
+        setTimeout(resetPosition, 1200);
+      }, 500);
+    }
+
+    function resetPosition() {
+      ball.style.bottom = "30px";
+      ball.style.left = "50%";
+      ball.style.transform = "translateX(-50%) scale(1)";
+      keeper.style.left = "50%";
+      msg.innerText = "다음 슛을 준비하세요!";
+      msg.style.color = "#8d6e63";
+      isShooting = false;
+      btns.forEach(b => b.disabled = false);
+    }
+  </script>
+</body>
+</html>
     <div id="keeper">🧤</div>
     <div id="ball">⚽</div>
   </div>
