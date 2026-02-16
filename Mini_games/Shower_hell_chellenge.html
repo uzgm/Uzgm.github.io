@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>😈 지옥의 샤워기: 온도 서바이벌 😈</title>
+  <style>
+    :root {
+      --bg-warm: #ffe0b2;
+      --bg-hot: #ff5252;
+      --bg-cold: #448aff;
+      --text-main: #424242;
+    }
+
+    body {
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: var(--bg-warm);
+      font-family: 'BMJUA', sans-serif;
+      transition: background-color 0.2s;
+      overflow: hidden;
+    }
+
+    .game-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 40px; padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      text-align: center; width: 90%; max-width: 400px;
+      position: relative; z-index: 10;
+    }
+
+    /* 온도 게이지 바 */
+    .gauge-container {
+      width: 100%; height: 40px;
+      background: #eee; border-radius: 20px;
+      margin: 20px 0; position: relative;
+      border: 4px solid #5d4037; overflow: hidden;
+    }
+
+    .target-zone {
+      position: absolute; left: 40%; width: 20%; height: 100%;
+      background: rgba(76, 175, 80, 0.4); /* 목표 지점 */
+      border-left: 2px solid green; border-right: 2px solid green;
+    }
+
+    .pointer {
+      position: absolute; top: 0; width: 8px; height: 100%;
+      background: #000; transition: left 0.1s linear;
+    }
+
+    /* 게임 오버 화면 */
+    #gameOverScreen {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      color: white; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 100;
+    }
+
+    .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    
+    .btn {
+      padding: 15px 30px; font-size: 1.2rem; border: none;
+      border-radius: 20px; cursor: pointer; font-family: 'BMJUA';
+      color: white; box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+    }
+    .btn-hot { background: #ff5252; }
+    .btn-cold { background: #448aff; }
+    .btn-retry { background: #4caf50; margin-top: 20px; }
+
+    /* 폰트 임포트 */
+    @font-face {
+      font-family: 'BMJUA';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <h1 id="title">🚿 샤워 온도 서바이벌</h1>
+    <p>적정 온도를 유지하지 못하면 죽음뿐이개!</p>
+    
+    <div class="gauge-container">
+      <div class="target-zone"></div>
+      <div id="pointer" class="pointer" style="left: 50%;"></div>
+    </div>
+
+    <div id="status">현재 온도는 아주 적당하개...</div>
+    
+    <div class="btn-group">
+      <button class="btn btn-hot" onmousedown="adjust(5)">🔥 뜨거운 물!</button>
+      <button class="btn btn-cold" onmousedown="adjust(-5)">❄️ 차가운 물!</button>
+    </div>
+    
+    <div style="margin-top: 20px; font-size: 1.2rem;">
+      생존 시간: <span id="timer">0</span>초
+    </div>
+  </div>
+
+  <div id="gameOverScreen">
+    <h1 id="failReason" style="font-size: 3rem;">💀 GAME OVER 💀</h1>
+    <p id="finalScore" style="font-size: 1.5rem;"></p>
+    <button class="btn btn-retry" onclick="location.reload()">다시 샤워하러 가기 🧼</button>
+  </div>
+
+  <script>
+    let temp = 50;
+    let time = 0;
+    let isGameOver = false;
+    const pointer = document.getElementById('pointer');
+    const timerDisplay = document.getElementById('timer');
+    const status = document.getElementById('status');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+
+    // 1. 난이도 조절: 온도가 매 프레임마다 제멋대로 춤을 춥니다.
+    function gameLoop() {
+      if(isGameOver) return;
+
+      // 온도가 매 초 랜덤하게 -2 ~ +2 사이로 요동침 (점점 심해짐)
+      let wobble = (Math.random() - 0.5) * (6 + time/10); 
+      temp += wobble;
+
+      // 화면 업데이트
+      pointer.style.left = temp + '%';
+
+      // 배경색 변화
+      if(temp > 70) document.body.style.backgroundColor = '#ff5252';
+      else if(temp < 30) document.body.style.backgroundColor = '#448aff';
+      else document.body.style.backgroundColor = '#ffe0b2';
+
+      // 게임 오버 체크 (0% 또는 100% 도달 시)
+      if(temp <= 0 || temp >= 100) {
+        endGame(temp <= 0 ? "🥶 꽁꽁 얼어버렸개!" : "🔥 통구이가 되었개!");
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 2. 생존 시간 카운트
+    setInterval(() => {
+      if(!isGameOver) {
+        time++;
+        timerDisplay.textContent = time;
+      }
+    }, 1000);
+
+    // 3. 온도 조절 버튼
+    function adjust(val) {
+      if(isGameOver) return;
+      temp += val;
+      temp = Math.max(-1, Math.min(101, temp));
+    }
+
+    // 4. 게임 종료 처리
+    function endGame(reason) {
+      isGameOver = true;
+      gameOverScreen.style.display = 'flex';
+      document.getElementById('failReason').textContent = reason;
+      document.getElementById('finalScore').textContent = "당신은 " + time + "초 동안 생존했개!";
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
