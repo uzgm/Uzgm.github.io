@@ -9,7 +9,8 @@
       --bg: #f9f3ee;
       --dog-brown: #c9b4a1;
       --nose-black: #1a1a1a;
-      --point-red: #fd6f61; /* 선물상자 리본 색상 */
+      --point-red: #fd6f61; 
+      --patch-blue: #7baaf7; /* 패치노트용 시원한 색상 추가 */
     }
 
     body {
@@ -20,7 +21,6 @@
       font-family: 'Pretendard', sans-serif;
     }
 
-    /* 선물 상자 모듈 */
     .download-box {
       width: 90%;
       max-width: 450px;
@@ -33,7 +33,6 @@
       position: relative;
     }
 
-    /* 댕댕이 귀 (데코레이션) */
     .download-box::before, .download-box::after {
       content: '';
       position: absolute;
@@ -60,32 +59,50 @@
 
     .info-text {
       color: #a1887f;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       line-height: 1.6;
     }
 
-    /* 이번엔 빨간 리본이 달린 코 버튼! */
-    .download-btn {
+    /* 버튼 공통 스타일 */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px; /* 버튼 사이 간격 */
+      align-items: center;
+    }
+
+    .base-btn {
       display: inline-block;
       text-decoration: none;
-      background: var(--nose-black);
       color: white;
-      padding: 20px 50px;
-      font-size: 1.2rem;
+      padding: 18px 30px;
+      font-size: 1.1rem;
       font-weight: 900;
       border-radius: 50px;
-      box-shadow: 0 8px 0 #000;
       transition: all 0.2s;
+      width: 80%; /* 버튼 너비 맞춤 */
     }
 
-    .download-btn:hover {
-      transform: scale(1.05) translateY(-5px);
-      background: #333;
+    /* 다운로드 버튼 */
+    .download-btn {
+      background: var(--nose-black);
+      box-shadow: 0 6px 0 #000;
     }
 
-    .download-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 4px 0 #000;
+    /* 패치노트 버튼 */
+    .patch-btn {
+      background: var(--point-red);
+      box-shadow: 0 6px 0 #c04e44;
+    }
+
+    .base-btn:hover {
+      transform: scale(1.05) translateY(-3px);
+      filter: brightness(1.2);
+    }
+
+    .base-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.5);
     }
 
     @keyframes bounce {
@@ -98,15 +115,21 @@
 
   <main class="download-box">
     <div class="icon-area">🎁</div>
-    <h1>베타버전 게임다운로드하기!</h1>
+    <h1>베타버전 게임다운로드!</h1>
     <p class="info-text">
-      댕댕이가 말아주는  마피아 게임<br>
-      아래 버튼을 누르면 즉시 댕댕이가 게임포장해서 줌! 🐾
+      댕댕이가 말아주는 마피아 게임<br>
+      아래 버튼을 누르면 즉시 포장해줌! 🐾
     </p>
     
-    <a href="https://github.com/uzgm/Uzgm.github.io/releases/download/Beta_version/mafia.zip" class="download-btn">
-      댕댕이에게 선물받기《디운로드하기window,android 2팩》 🐾
-    </a>
+    <div class="btn-group">
+      <a href="https://github.com/uzgm/Uzgm.github.io/releases/download/Beta_version/mafia.zip" class="base-btn download-btn">
+        댕댕이에게 선물받기 🐾
+      </a>
+
+      <a href="update.html" class="base-btn patch-btn">
+        무슨 일이 있었나? 패치노트 보기 📜
+      </a>
+    </div>
   </main>
 
 </body>
