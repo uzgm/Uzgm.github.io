@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zgm Studio - Patch Notes 🐾</title>
+  <style>
+    :root {
+      --bg: #f9f3ee;
+      --dog-brown: #c9b4a1;
+      --nose-black: #1a1a1a;
+      --point-red: #fd6f61;
+      --paper-white: #ffffff;
+    }
+
+    body {
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: var(--bg);
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    /* 패치노트 전용 박스 */
+    .update-container {
+      width: 90%;
+      max-width: 500px;
+      background: var(--paper-white);
+      border: 4px dashed var(--dog-brown); /* 귀여운 점선 테두리 */
+      border-radius: 40px;
+      padding: 40px 25px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    h1 {
+      color: #5d4037;
+      font-size: 1.8rem;
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .version-tag {
+      background: var(--point-red);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    /* 패치 내용 리스트 */
+    .update-list {
+      text-align: left;
+      background: #fffaf5;
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      list-style: none;
+    }
+
+    .update-list li {
+      margin-bottom: 15px;
+      color: #6d4c41;
+      font-size: 1rem;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .update-list li::before {
+      content: '🐾';
+      margin-right: 10px;
+    }
+
+    /* 돌아가기 버튼 */
+    .back-btn {
+      display: inline-block;
+      text-decoration: none;
+      background: var(--dog-brown);
+      color: white;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      background: #b8a08d;
+      transform: scale(1.02);
+    }
+
+    .footer-dog {
+      font-size: 0.8rem;
+      color: #c9b4a1;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="update-container">
+    <div style="text-align: center;">
+      <span class="version-tag">Beta v1.0.4 Patch</span>
+    </div>
+    
+    <h1>댕댕이가 고친 것들 📜</h1>
+
+    <ul class="update-list">
+      <li>마피아가 밥 먹을 때 총 쏘는 버그를 수정했어요. (예의 중시!)</li>
+      <li>시민들이 너무 빨리 뛰길래 간식 냄새로 발을 묶었어요.</li>
+      <li>안드로이드 버전에서 꼬리가 안 흔들리던 현상을 개선했습니다.</li>
+      <li>윈도우 환경에서 창 모드 전환 시 댕댕이가 짖는 소리를 추가했어요.</li>
+      <li>전반적인 시스템 안정화를 위해 털을 한 번 빗었습니다.</li>
+    </ul>
+
+    <div style="text-align: center;">
+      <a href="index.html" class="back-btn">메인으로 돌아가기</a>
+      <p class="footer-dog">© zgm Studio - 댕댕이 개발자 일동</p>
+    </div>
+  </main>
+
+</body>
+</html>
