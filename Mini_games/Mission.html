@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title> 오늘의 미션 V2</title>
+    <style>
+        :root {
+            --dog-white: #ffffff;
+            --dog-beige: #f5f5dc;
+            --dog-brown: #8b4513;
+            --accent: #d2b48c;
+            --star-gold: #ffcc00;
+        }
+
+        body {
+            background-color: #f0ede5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        #mission-card {
+            background-color: var(--dog-white);
+            border: 10px solid var(--dog-beige);
+            border-radius: 60px;
+            padding: 50px 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 380px;
+            position: relative;
+        }
+
+        /* 귀여운 강아지 귀 */
+        #mission-card::before, #mission-card::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            width: 90px;
+            height: 120px;
+            background-color: var(--dog-beige);
+            border-radius: 50% 50% 30% 30%;
+            z-index: -1;
+        }
+        #mission-card::before { left: 30px; transform: rotate(-25deg); }
+        #mission-card::after { right: 30px; transform: rotate(25deg); }
+
+        .dog-nose {
+            width: 30px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+            margin: 10px auto;
+        }
+
+        h1 { color: var(--dog-brown); font-size: 1.6rem; margin-bottom: 5px; }
+        #status-msg { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
+        
+        .btn {
+            background-color: var(--dog-beige);
+            border: 3px solid var(--accent);
+            padding: 18px 40px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            color: var(--dog-brown);
+            box-shadow: 0 4px 0 var(--accent);
+        }
+
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn:disabled { background-color: #eee; border-color: #ccc; box-shadow: none; cursor: not-allowed; color: #aaa; }
+
+        #result { 
+            margin-top: 30px; 
+            padding: 20px;
+            background: #fffdf9;
+            border-radius: 25px;
+            border: 2px dashed var(--accent);
+            display: none; 
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .stars { color: var(--star-gold); font-size: 1.4rem; margin: 10px 0; letter-spacing: 3px; }
+        .game-tag {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .bg-pubg { background: #f39c12; }
+        .bg-valo { background: #ff4655; }
+        .bg-gta { background: #2ecc71; }
+
+        #mission-text { color: #444; word-break: keep-all; }
+    </style>
+</head>
+<body>
+
+<div id="mission-card">
+    <div style="font-size: 60px; margin-bottom: -10px;">🐶</div>
+    <div class="dog-nose"></div>
+    <h1>오늘의 미션</h1>
+    <p id="status-msg">랜덤 미션 뽑기! (하루에 한 번만 가능)</p>
+    
+    <button id="draw-btn" class="btn" onclick="getMission()"> 미션 확인하기!</button>
+
+    <div id="result">
+        <div id="game-type" class="game-tag"></div>
+        <div id="star-rating" class="stars"></div>
+        <div id="mission-text" style="font-weight: bold; font-size: 1.2rem; line-height: 1.4;"></div>
+    </div>
+</div>
+
+<script>
+    const missions = [
+        // 배틀그라운드
+        { game: "배틀그라운드", stars: 1, class: "bg-pubg", task: "붕대만 써서 탑 10 진입하기" },
+        { game: "배틀그라운드", stars: 2, task: "오토바이로 공중제비 한 바퀴 돌고 생존하기" },
+        { game: "배틀그라운드", stars: 3, task: "투척무기(수류탄/화염병)로만 1킬 이상 하기" },
+        { game: "배틀그라운드", stars: 4, task: "자기장 밖에서 3분 이상 버티다 복귀하기" },
+        { game: "배틀그라운드", stars: 5, task: "프라이팬으로 막타 쳐서 킬 하기 (진정한 고인물)" },
+        { game: "배틀그라운드", stars: 3, task: "보급 상자 털어서 나온 템으로만 교전하기" },
+
+        // 발로란트
+        { game: "발로란트", stars: 1, class: "bg-valo", task: "한 라운드 내내 권총만 사용하기" },
+        { game: "발로란트", stars: 2, task: "스킬 안 쓰고 총으로만 3킬 기록하기" },
+        { game: "발로란트", stars: 3, task: "적 베이스 근처까지 몰래 가서 뒤통수 치기" },
+        { game: "발로란트", stars: 4, task: "클러치(1대다 상황) 성공하고 전체 채팅으로 '?' 치기" },
+        { game: "발로란트", stars: 5, task: "궁극기로 3명 이상 동시에 맞추거나 처치하기" },
+        { game: "발로란트", stars: 2, task: "팀원이 죽을 때마다 진심으로 애도하며 오열하기(마이크)" },
+
+        // GTA 5
+        { game: "GTA 5", stars: 1, class: "bg-gta", task: "차 안 뺏고 택시만 타고 목적지 가기" },
+        { game: "GTA 5", stars: 2, task: "비행기 뺏어서 빌딩 사이 통과 5번 하기" },
+        { game: "GTA 5", stars: 3, task: "오토바이로 산 꼭대기까지 올라가서 번지점프하기" },
+        { game: "GTA 5", stars: 4, task: "편의점 털고 경찰 따돌릴 때까지 차 안 바꾸기" },
+        { game: "GTA 5", stars: 5, task: "지하철 터널 안으로 차 몰고 들어가서 경찰 따돌리기" },
+        { game: "GTA 5", stars: 3, task: "낙하산 없이 높은 곳에서 떨어져서 수영장으로 골인하기" }
+    ];
+
+    window.onload = function() {
+        const lastDate = localStorage.getItem('lastMissionDate');
+        const today = new Date().toDateString();
+
+        if (lastDate === today) {
+            const savedMission = JSON.parse(localStorage.getItem('todayMission'));
+            displayMission(savedMission);
+            disableButton("이미 오늘의 미션을 받았개!");
+        }
+    };
+
+    function getMission() {
+        const today = new Date().toDateString();
+        const randomIndex = Math.floor(Math.random() * missions.length);
+        const selected = missions[randomIndex];
+
+        localStorage.setItem('lastMissionDate', today);
+        localStorage.setItem('todayMission', JSON.stringify(selected));
+
+        displayMission(selected);
+        disableButton("미션 성공하길 바란다멍!");
+    }
+
+    function displayMission(mission) {
+        const resDiv = document.getElementById('result');
+        const tag = document.getElementById('game-type');
+        
+        resDiv.style.display = 'block';
+        tag.innerText = mission.game;
+        
+        // 게임별 색상 적용
+        tag.className = 'game-tag'; 
+        if(mission.game === "배틀그라운드") tag.classList.add('bg-pubg');
+        else if(mission.game === "발로란트") tag.classList.add('bg-valo');
+        else tag.classList.add('bg-gta');
+
+        document.getElementById('star-rating').innerText = "⭐".repeat(mission.stars);
+        document.getElementById('mission-text').innerText = mission.task;
+    }
+
+    function disableButton(msg) {
+        const btn = document.getElementById('draw-btn');
+        btn.disabled = true;
+        btn.innerText = "내일 다시!";
+        document.getElementById('status-msg').innerText = msg;
+    }
+</script>
+
+</body>
+</html>
