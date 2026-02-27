@@ -10,6 +10,7 @@
       --bg: #fdf5e6;
       --dog-brown: #c9b4a1;
       --nose-black: #1a1a1a;
+      --highlight: #ff6b6b;
     }
 
     body {
@@ -19,8 +20,43 @@
       display: flex; flex-direction: column; align-items: center;
     }
 
-    .header { text-align: center; margin-bottom: 50px; }
+    .header { text-align: center; margin-bottom: 30px; }
     
+    /* 🔍 검색 바 스타일 */
+    .search-container {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 15px 25px;
+      font-size: 1.1rem;
+      border: 4px solid var(--dog-brown);
+      border-radius: 50px;
+      outline: none;
+      background: white;
+      box-sizing: border-box;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    #search-input:focus {
+      border-color: var(--nose-black);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
     /* 2. 게임 카드 그리드 */
     #game-list {
       display: grid;
@@ -41,6 +77,8 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
 
+    .card.hidden { display: none; } /* 검색 필터링용 */
+
     .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
     .icon { font-size: 4rem; margin-bottom: 10px; }
     .title { font-size: 1.4rem; font-weight: 800; color: #5d4037; }
@@ -56,98 +94,89 @@
     }
 
     .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+    /* 결과 없음 메시지 */
+    #no-result {
+      display: none;
+      text-align: center;
+      color: #8d6e63;
+      margin-top: 50px;
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body>
 
   <header class="header">
     <h1>🐶 mini games</h1>
-    <p>아래 목록에서 게임을 골라봐!</p>
+    <p>찾고 싶은 게임을 검색해봐!</p>
   </header>
 
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="게임 제목을 입력하세요...">
+    <span class="search-icon">🔍</span>
+  </div>
+
   <main id="game-list"></main>
+  
+  <div id="no-result">찾으시는 게임이 없나봐요... 멍! 🐾</div>
 
   <script>
-    /* 🛠 여기에 게임을 추가! 
-       형식: { title: "제목", icon: "아이콘", desc: "설명", link: "경로", color: "테두리색" }
-    */
     const games = [
-      {
-        title: "축구 미니게임",
-        icon: "⚽",
-        desc: "댕댕이의 미친 드리블!<br>골대를 박살내보자고.",
-        link: "Soccer_minigame.html",
-        color: "#4caf50"
-      },
-      {
-        title: "파이널 치킨즈",
-        icon: "🐥",
-        desc: "본격 턴제 게임<br>조류의 전설이 되어 티라노를 뚜드려 패버리자!",
-        link: "FINAL_CHICKEN.html",
-        color: "#ffeb3b"
-      },
-      {
-        title: "댕댕이의 달리기",
-        icon: "🐶",
-        desc: "댕댕이의<br>러닝!",
-        link: "Doggy_run.html",
-        color: "#9c27b5"
-      },
-      {
-        title: "에임트레이너 하드",
-        icon: "🎯",
-        desc: "에임<br>트레이너 하드버전!",
-        link: "Aim_trainer.html",
-        color: "#07FFEB"
-      },
-      {
-        title: "오늘의 운세",
-        icon: "🧧",
-        desc: "오늘<br>운세 뽑기",
-        link: "Day_Fortune.html",
-        color: "#8b67b9"
-      },
-      {
-        title: "지옥의 샤워 챌린지",
-        icon: "🛁",
-        desc: "지옥의 물 온도<br>설정하기",
-        link: "Shower_hell_chellenge.html",
-        color: "#A37D33"
-    },
-      {
-        title: "오늘의 미션",
-        icon: "📋",
-        desc: "1일1회 랜덤미션<br>하기",
-        link: "Mission.html",
-        color: "#EDB3F7"
-    },
-      
-      {
-        title: "pubg 추천총기 측정기",
-        icon: "🔫",
-        desc: "측정<br>하기",
-        link: "Gun.html",
-        color: "#3E001F"
-    }
+      { title: "축구 미니게임", icon: "⚽", desc: "댕댕이의 미친 드리블!<br>골대를 박살내보자고.", link: "Soccer_minigame.html", color: "#4caf50" },
+      { title: "파이널 치킨즈", icon: "🐥", desc: "본격 턴제 게임<br>조류의 전설이 되어 티라노를 뚜드려 패버리자!", link: "FINAL_CHICKEN.html", color: "#ffeb3b" },
+      { title: "댕댕이의 달리기", icon: "🐶", desc: "댕댕이의<br>러닝!", link: "Doggy_run.html", color: "#9c27b5" },
+      { title: "에임트레이너 하드", icon: "🎯", desc: "에임<br>트레이너 하드버전!", link: "Aim_trainer.html", color: "#07FFEB" },
+      { title: "오늘의 운세", icon: "🧧", desc: "오늘<br>운세 뽑기", link: "Day_Fortune.html", color: "#8b67b9" },
+      { title: "지옥의 샤워 챌린지", icon: "🛁", desc: "지옥의 물 온도<br>설정하기", link: "Shower_hell_chellenge.html", color: "#A37D33" },
+      { title: "오늘의 미션", icon: "📋", desc: "1일1회 랜덤미션<br>하기", link: "Mission.html", color: "#EDB3F7" },
+      { title: "pubg 추천총기 측정기", icon: "🔫", desc: "측정<br>하기", link: "Gun.html", color: "#3E001F" }
     ];
 
-    // 게임 데이터를 화면에 그려주는 마법
     const listContainer = document.getElementById('game-list');
+    const searchInput = document.getElementById('search-input');
+    const noResult = document.getElementById('no-result');
     
-    games.forEach(game => {
-      const card = document.createElement('article');
-      card.className = 'card';
-      card.style.borderColor = game.color; // 설정한 색상 적용
-      
-      card.innerHTML = `
-        <div class="icon">${game.icon}</div>
-        <h2 class="title">${game.title}</h2>
-        <p class="desc">${game.desc}</p>
-        <a href="${game.link}" class="btn">플레이하기</a>
-      `;
-      
-      listContainer.appendChild(card);
+    // 초기 렌더링
+    function renderGames() {
+      listContainer.innerHTML = '';
+      games.forEach(game => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.dataset.title = game.title; // 검색용 데이터
+        card.style.borderColor = game.color;
+        
+        card.innerHTML = `
+          <div class="icon">${game.icon}</div>
+          <h2 class="title">${game.title}</h2>
+          <p class="desc">${game.desc}</p>
+          <a href="${game.link}" class="btn">플레이하기</a>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    // 실시간 검색 로직
+    searchInput.addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const title = card.dataset.title.toLowerCase();
+        if (title.includes(keyword)) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      // 결과 없을 때 처리
+      noResult.style.display = visibleCount === 0 ? 'block' : 'none';
     });
+
+    renderGames();
   </script>
 
 </body>
