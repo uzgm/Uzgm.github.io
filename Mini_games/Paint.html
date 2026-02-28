@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>그림판</title>
+    <style>
+        :root {
+            --panel-bg: #1e1e1e;
+            --accent: #ffeb3b; /* 댕댕이 느낌의 노란색 포인트 */
+            --text: #ffffff;
+        }
+        body {
+            margin: 0; background: #121212; color: var(--text);
+            font-family: 'Pretendard', sans-serif;
+            display: flex; flex-direction: column; height: 100vh;
+            overflow: hidden; touch-action: none; /* 전체 스크롤 방지 */
+        }
+
+        /* 📱 모바일 최적화 툴바 (가로 스크롤 가능) */
+        .toolbar {
+            background: var(--panel-bg);
+            padding: 10px;
+            display: flex; align-items: center; gap: 15px;
+            overflow-x: auto; /* 도구가 많아지면 옆으로 밀어서 확인 */
+            white-space: nowrap;
+            border-bottom: 2px solid #333;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* 스크롤바 숨기기 */
+        .toolbar::-webkit-scrollbar { display: none; }
+
+        .tool-group { 
+            display: flex; align-items: center; gap: 8px; 
+            border-right: 1px solid #444; padding-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        label { font-size: 0.75rem; color: #888; font-weight: 900; }
+        input[type="color"] { border: none; width: 30px; height: 30px; background: none; -webkit-appearance: none; }
+        input[type="range"] { width: 80px; accent-color: var(--accent); }
+
+        button {
+            background: #333; color: white; border: none; padding: 10px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold;
+            flex-shrink: 0;
+        }
+        button:active { transform: scale(0.95); opacity: 0.8; }
+        button.active { background: var(--accent); color: #000; }
+        button.save { background: #00e676; color: #000; }
+
+        /* 캔버스 영역 */
+        .canvas-container {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            background: #252525; padding: 10px;
+        }
+        canvas {
+            background: white; border-radius: 5px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            touch-action: none; /* 터치 드로잉 필수 */
+        }
+
+        /* 하단 안내바 */
+        .footer {
+            background: #1e1e1e; font-size: 0.7rem; color: #666;
+            text-align: center; padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="toolbar">
+        <div class="tool-group">
+            <label>COLOR</label>
+            <input type="color" id="colorPicker" value="#000000">
+        </div>
+        <div class="tool-group">
+            <label>SIZE</label>
+            <input type="range" id="lineWidth" min="1" max="40" value="5">
+        </div>
+        <button id="eraserBtn">지우개</button>
+        <button id="clearBtn">전체삭제</button>
+        <button id="saveBtn" class="save">저장</button>
+    </header>
+
+    <main class="canvas-container">
+        <canvas id="paintCanvas"></canvas>
+    </main>
+
+    <footer class="footer">그림판</footer>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
+        const lineWidth = document.getElementById('lineWidth');
+        const clearBtn = document.getElementById('clearBtn');
+        const eraserBtn = document.getElementById('eraserBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        let isDrawing = false;
+        let isEraser = false;
+
+        function initCanvas() {
+            // 화면 크기에 맞춰 캔버스 비율 설정
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 선 스타일 초기 설정
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // 터치와 마우스 좌표 통합 처리
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function start(e) {
+            isDrawing = true;
+            const {x, y} = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function move(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // 스크롤 방지
+            const {x, y} = getPos(e);
+            
+            ctx.lineWidth = lineWidth.value;
+            ctx.strokeStyle = isEraser ? "white" : colorPicker.value;
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function end() {
+            isDrawing = false;
+        }
+
+        // 터치 이벤트 (모바일용)
+        canvas.addEventListener('touchstart', start, {passive: false});
+        canvas.addEventListener('touchmove', move, {passive: false});
+        canvas.addEventListener('touchend', end);
+
+        // 마우스 이벤트 (PC 겸용)
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
+
+        // 기능 버튼
+        eraserBtn.onclick = () => {
+            isEraser = !isEraser;
+            eraserBtn.classList.toggle('active');
+            eraserBtn.innerText = isEraser ? "펜 모드" : "지우개";
+        };
+
+        clearBtn.onclick = () => {
+            if(confirm("🐶다 지울거야?🐶")) {
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        };
+
+        saveBtn.onclick = () => {
+            const data = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.href = data;
+            link.download = 'zgm-art.png';
+            link.click();
+        };
+
+    </script>
+</body>
+</html>
