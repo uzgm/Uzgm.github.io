@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>레이서가 되자~</title>
+    <title>전진하는 레이서 장애물 피하기</title>
     <style>
         body { margin: 0; background: #2ecc71; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: sans-serif; touch-action: none; }
         
@@ -18,19 +18,19 @@
             overflow: hidden; 
         }
         
-        /* 중앙선 */
-        .lane { position: absolute; left: 50%; width: 4px; height: 50px; background: white; transform: translateX(-50%); animation: moveLane 0.3s linear infinite; }
+        /* 중앙선 (애니메이션 속도를 0.3s -> 0.2s로 해서 더 빠르게 보이게 함) */
+        .lane { position: absolute; left: 50%; width: 4px; height: 50px; background: white; transform: translateX(-50%); animation: moveLane 0.2s linear infinite; }
         @keyframes moveLane { from { top: -100px; } to { top: 100vh; } }
 
-        /* 주인공 자동차 */
+        /* 주인공 자동차 - bottom을 200px로 올려서 더 앞에 있게 함 */
         #player { 
             position: absolute; 
             width: 60px; 
             height: 60px; 
             font-size: 50px; 
-            bottom: 50px; 
+            bottom: 200px; /* <--- 이 값을 키울수록 차가 더 앞(위)으로 감! */
             left: calc(50% - 30px); 
-            z-index: 10; 
+            z-index: 20; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -42,7 +42,6 @@
         
         .score-board { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #000; z-index: 100; }
         
-        /* 모바일 터치 안내 레이어 */
         .touch-hint { position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; pointer-events: none; }
     </style>
 </head>
@@ -56,7 +55,7 @@
     <div class="lane" style="top: 75vh;"></div>
     
     <div id="player">🏎️</div>
-    <div class="touch-hint">화면 왼쪽/오른쪽을 터치해서 운전해!</div>
+    <div class="touch-hint">터치해서 앞서나가는 적들을 피해봐!</div>
 </div>
 
 <script>
@@ -69,19 +68,17 @@
     let score = 0;
     let isLive = true;
 
-    // 1. 모바일 터치 조작
     window.addEventListener('touchstart', (e) => {
         if (!isLive) return;
         const touchX = e.touches[0].clientX;
         if (touchX < screenWidth / 2) {
-            posX = Math.max(10, posX - 60); // 왼쪽
+            posX = Math.max(10, posX - 60);
         } else {
-            posX = Math.min(screenWidth - 70, posX + 60); // 오른쪽
+            posX = Math.min(screenWidth - 70, posX + 60);
         }
         player.style.left = posX + 'px';
     });
 
-    // 2. PC 키보드 조작 (둘 다 되게!)
     document.addEventListener('keydown', (e) => {
         if (!isLive) return;
         if (e.key === 'ArrowLeft' && posX > 10) posX -= 40;
@@ -93,7 +90,7 @@
         if (!isLive) return;
         const obs = document.createElement('div');
         obs.className = 'obs';
-        const items = ['💩', '🚧', '🔥', '🍌', '💣'];
+        const items = ['💩', '🚧', '🔥', '🍌', '💣', '🚛']; // 트럭 추가!
         obs.innerHTML = items[Math.floor(Math.random() * items.length)];
         obs.style.left = Math.floor(Math.random() * (screenWidth - 50)) + 'px';
         obs.style.top = '-80px';
@@ -102,16 +99,15 @@
         let fall = setInterval(() => {
             if (!isLive) { clearInterval(fall); return; }
             let top = parseInt(obs.style.top);
-            obs.style.top = (top + 7) + 'px';
+            obs.style.top = (top + 10) + 'px'; // 장애물 속도도 살짝 업!
 
             let pRect = player.getBoundingClientRect();
             let oRect = obs.getBoundingClientRect();
 
-            // 충돌 감지 (여유있게 판정)
-            if (!(pRect.right < oRect.left + 5 || pRect.left > oRect.right - 5 || 
-                  pRect.bottom < oRect.top + 5 || pRect.top > oRect.bottom - 5)) {
+            if (!(pRect.right < oRect.left + 8 || pRect.left > oRect.right - 8 || 
+                  pRect.bottom < oRect.top + 8 || pRect.top > oRect.bottom - 8)) {
                 isLive = false;
-                alert("💥 사고 발생! 점수: " + score + "\n다시 도전하려면 확인을 눌러!");
+                alert("💥 충돌! 너무 앞서나갔나? 점수: " + score);
                 location.reload();
             }
 
@@ -123,7 +119,7 @@
             }
         }, 20);
 
-        setTimeout(spawnObs, Math.max(400, 1000 - (score/20)));
+        setTimeout(spawnObs, Math.max(300, 800 - (score/25)));
     }
 
     spawnObs();
