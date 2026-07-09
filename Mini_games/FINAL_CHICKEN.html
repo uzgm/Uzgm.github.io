@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🐥 FINAL CHICKENS "tantrum" </title>
+  <title>🐥 FINAL CHICKENS "tantrum remaster" </title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@700&display=swap');
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -18,7 +18,11 @@
 
     .sprite { font-size: 60px; transition: 0.2s; position: relative; }
     .player-side { transform: scaleX(-1); }
-    .active-unit { filter: drop-shadow(0 0 15px #fff) scaleX(-1.2) translateY(-10px) !important; }
+
+    /* 원래 filter에 transform 함수가 섞여있어 동작하지 않던 부분을 분리 수정 */
+    .active-unit { filter: drop-shadow(0 0 15px #fff) !important; transform: translateY(-10px) !important; }
+    .player-side.active-unit { transform: scaleX(-1.2) translateY(-10px) !important; }
+
     .target-unit { filter: drop-shadow(0 0 15px #ff4444); animation: blink 0.4s infinite; }
     @keyframes blink { 50% { opacity: 0.4; } }
 
@@ -149,7 +153,8 @@
     });
     enemies.forEach((m,i)=>{
       const s=document.createElement('div'); s.className='sprite'; s.id=`e-${i}`; s.innerText=m.img;
-      s.onclick=()=>{ if(currentSkill) attackTarget(m); };
+      // 수정: 죽은(curHp<=0) 적은 클릭해도 타겟이 되지 않도록 생존 체크 추가
+      s.onclick=()=>{ if(currentSkill && m.curHp>0) attackTarget(m); };
       eBox.appendChild(s);
     });
   }
@@ -163,6 +168,9 @@
 
     const sId = unit.side==='p'?`p-${myParty.indexOf(unit)}`:`e-${enemies.indexOf(unit)}`;
     document.getElementById(sId).classList.add('active-unit');
+
+    // 수정: 적 턴에는 물약 버튼을 잠궈서 잘못된 인덱싱으로 크래시 나는 것을 방지
+    document.getElementById('use-pot-btn').disabled = (unit.side !== 'p');
 
     if(unit.side==='e') setTimeout(()=>enemyAI(unit), 1000);
     else { unit.curMp=Math.min(unit.mp, unit.curMp+10); updateUI(); showSkillPages(unit); }
@@ -182,7 +190,6 @@
       });
       list.appendChild(page);
     }
-    document.getElementById('use-pot-btn').disabled = false;
   }
 
   function selectSkill(s, unit) {
@@ -211,8 +218,11 @@
   }
 
   function usePotion() {
-    const unit = myParty[turnIdx % (myParty.length+enemies.length)];
-    if(potionCount > 0 && unit.side === 'p') {
+    // 수정: myParty가 아니라 전체 유닛 배열에서 인덱싱해야 함.
+    // 기존 코드는 적 턴(turnIdx가 2,3...)일 때 myParty[2]/[3]이 undefined가 되어
+    // 바로 아래 unit.side 접근에서 에러가 나던 버그가 있었음.
+    const unit = [...myParty, ...enemies][turnIdx % (myParty.length+enemies.length)];
+    if(potionCount > 0 && unit && unit.side === 'p' && unit.curHp > 0) {
       potionCount--; unit.curHp = Math.min(unit.hp, unit.curHp + 150);
       document.getElementById('pot-count').innerText = potionCount;
       log(`포션 사용! ${unit.name} HP 150 회복!`);
