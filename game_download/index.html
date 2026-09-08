@@ -10,7 +10,7 @@
       --dog-brown: #c9b4a1;
       --nose-black: #1a1a1a;
       --point-red: #fd6f61; 
-      --patch-blue: #7baaf7; /* 패치노트용 시원한 색상 추가 */
+      --patch-blue: #7baaf7;
     }
 
     body {
@@ -63,11 +63,10 @@
       line-height: 1.6;
     }
 
-    /* 버튼 공통 스타일 */
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 15px; /* 버튼 사이 간격 */
+      gap: 15px;
       align-items: center;
     }
 
@@ -80,16 +79,16 @@
       font-weight: 900;
       border-radius: 50px;
       transition: all 0.2s;
-      width: 80%; /* 버튼 너비 맞춤 */
+      width: 80%;
+      cursor: pointer;
+      border: none;
     }
 
-    /* 다운로드 버튼 */
     .download-btn {
       background: var(--nose-black);
       box-shadow: 0 6px 0 #000;
     }
 
-    /* 패치노트 버튼 */
     .patch-btn {
       background: var(--point-red);
       box-shadow: 0 6px 0 #c04e44;
@@ -122,15 +121,29 @@
     </p>
     
     <div class="btn-group">
-      <a href="https://github.com/uzgm/Uzgm.github.io/releases/download/Beta_version/OvenBound-Windows-1.zip" class="base-btn download-btn">
+      <!-- 자바스크립트 함수 연결 -->
+      <button onclick="downloadGame()" class="base-btn download-btn">
         댕댕이에게 선물받기 🐾
-      </a>
+      </button>
 
       <a href="update.html" class="base-btn patch-btn">
         패치노트 보기 📜
       </a>
     </div>
   </main>
+
+  <script>
+    function downloadGame() {
+      const url = "https://github.com/uzgm/Uzgm.github.io/releases/download/Beta_version/OvenBound-Windows-1.zip";
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'OvenBound-Windows-1.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
 
 </body>
 </html>
