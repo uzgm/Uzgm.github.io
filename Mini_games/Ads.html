@@ -1,526 +1,78 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>Oven Bound - Coffee Bread Design</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: #191411;
-    color: #eee;
-    font-family: Arial, sans-serif;
-}
-
-.container {
-    width: 900px;
-    margin: 40px auto;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 5px;
-}
-
-.subtitle {
-    text-align: center;
-    color: #a99688;
-    margin-bottom: 35px;
-}
-
-
-/* =========================
-   CHARACTER DISPLAY
-========================= */
-
-.character-area {
-    height: 650px;
-    background:
-        radial-gradient(
-            circle at center,
-            #3b2a21 0%,
-            #201813 55%,
-            #120f0d 100%
-        );
-
-    border: 1px solid #594438;
-    border-radius: 20px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    position: relative;
-}
-
-
-/* =========================
-   COFFEE BREAD BODY
-========================= */
-
-.coffee-bread {
-
-    width: 250px;
-    height: 440px;
-
-    position: relative;
-
-    background:
-        linear-gradient(
-            90deg,
-            #4b2c20 0%,
-            #714832 18%,
-            #80563b 50%,
-            #714832 82%,
-            #4b2c20 100%
-        );
-
-    border-radius: 125px;
-
-    box-shadow:
-        inset 12px 0 20px rgba(0,0,0,0.22),
-        inset -12px 0 20px rgba(0,0,0,0.22),
-        0 20px 40px rgba(0,0,0,0.5);
-}
-
-
-/* =========================
-   COFFEE DOUGH TEXTURE
-========================= */
-
-.texture {
-    position: absolute;
-
-    width: 100%;
-    height: 100%;
-
-    border-radius: inherit;
-
-    opacity: 0.18;
-
-    background:
-        radial-gradient(circle at 20% 30%, #c18b63 0 2px, transparent 3px),
-        radial-gradient(circle at 70% 20%, #3b2017 0 2px, transparent 3px),
-        radial-gradient(circle at 35% 65%, #3b2017 0 1px, transparent 2px),
-        radial-gradient(circle at 80% 72%, #c18b63 0 1px, transparent 2px),
-        radial-gradient(circle at 55% 40%, #3b2017 0 1px, transparent 2px);
-
-    background-size: 50px 50px;
-}
-
-
-/* =========================
-   FACE
-========================= */
-
-.face {
-    position: absolute;
-
-    width: 190px;
-    height: 180px;
-
-    left: 30px;
-    top: 90px;
-}
-
-
-/* =========================
-   EYEBROWS
-========================= */
-
-.eyebrow {
-
-    position: absolute;
-
-    width: 58px;
-    height: 7px;
-
-    background: #351d15;
-
-    border-radius: 100%;
-
-    top: 15px;
-}
-
-.eyebrow.left {
-    left: 10px;
-    transform: rotate(-7deg);
-}
-
-.eyebrow.right {
-    right: 10px;
-    transform: rotate(7deg);
-}
-
-
-/* =========================
-   EYES
-========================= */
-
-.eye {
-
-    position: absolute;
-
-    width: 58px;
-    height: 30px;
-
-    background: #f0ddd0;
-
-    border-radius: 50%;
-
-    top: 38px;
-
-    box-shadow:
-        inset 0 -4px 0 #d2a997;
-}
-
-.eye.left {
-    left: 5px;
-    transform: rotate(-5deg);
-}
-
-.eye.right {
-    right: 5px;
-    transform: rotate(5deg);
-}
-
-
-/* IRIS */
-
-.iris {
-
-    position: absolute;
-
-    width: 22px;
-    height: 22px;
-
-    background: #291610;
-
-    border-radius: 50%;
-
-    top: 4px;
-    left: 18px;
-}
-
-.iris::after {
-
-    content: "";
-
-    position: absolute;
-
-    width: 6px;
-    height: 6px;
-
-    background: white;
-
-    border-radius: 50%;
-
-    top: 4px;
-    left: 5px;
-}
-
-
-/* =========================
-   NOSE
-========================= */
-
-.nose {
-
-    position: absolute;
-
-    width: 10px;
-    height: 8px;
-
-    border-bottom: 3px solid #4a291e;
-
-    border-radius: 50%;
-
-    left: 90px;
-    top: 90px;
-}
-
-
-/* =========================
-   MOUTH
-========================= */
-
-.mouth {
-
-    position: absolute;
-
-    width: 42px;
-    height: 18px;
-
-    left: 74px;
-    top: 115px;
-
-    border-bottom: 5px solid #351812;
-
-    border-radius: 0 0 50% 50%;
-}
-
-
-/* =========================
-   ARMS
-========================= */
-
-.arm {
-
-    position: absolute;
-
-    width: 35px;
-    height: 150px;
-
-    background: #6f4832;
-
-    border-radius: 25px;
-
-    top: 220px;
-}
-
-.arm.left {
-    left: -20px;
-    transform: rotate(8deg);
-}
-
-.arm.right {
-    right: -20px;
-    transform: rotate(-8deg);
-}
-
-
-/* =========================
-   LEGS
-========================= */
-
-.leg {
-
-    position: absolute;
-
-    width: 55px;
-    height: 75px;
-
-    background: #5c3929;
-
-    border-radius: 20px;
-
-    bottom: -40px;
-}
-
-.leg.left {
-    left: 45px;
-}
-
-.leg.right {
-    right: 45px;
-}
-
-
-/* =========================
-   FEET
-========================= */
-
-.foot {
-
-    position: absolute;
-
-    width: 70px;
-    height: 35px;
-
-    background: #4a2b20;
-
-    border-radius: 50%;
-
-    bottom: -55px;
-}
-
-.foot.left {
-    left: 28px;
-}
-
-.foot.right {
-    right: 28px;
-}
-
-
-/* =========================
-   DESIGN INFORMATION
-========================= */
-
-.info {
-
-    margin-top: 25px;
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    gap: 15px;
-}
-
-.card {
-
-    background: #251c17;
-
-    border: 1px solid #4a382d;
-
-    border-radius: 12px;
-
-    padding: 18px;
-}
-
-.card h3 {
-
-    margin-top: 0;
-
-    color: #d9ad8b;
-}
-
-.color {
-
-    width: 30px;
-    height: 30px;
-
-    border-radius: 50%;
-
-    display: inline-block;
-
-    vertical-align: middle;
-
-    margin-right: 8px;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>배그 에임 고수 되기</title>
+    <style>
+        body { margin: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: sans-serif; cursor: crosshair; }
+        #game-screen { position: relative; width: 100vw; height: 100vh; background: #2c3e50; overflow: hidden; transition: transform 0.1s ease; }
+        
+        /* 줌 효과 (ADS) */
+        .ads-zoom { transform: scale(1.5); }
+
+        /* 타겟 (적) */
+        .target { position: absolute; width: 40px; height: 60px; background: #e74c3c; border-radius: 5px; border: 2px solid #c0392b; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 5; }
+
+        /* 조준점 (Crosshair) */
+        #crosshair { position: fixed; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid #2ecc71; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 100; }
+        #crosshair::after, #crosshair::before { content: ''; position: absolute; background: #2ecc71; }
+        #crosshair::after { width: 100%; height: 2px; top: 50%; left: 0; transform: translateY(-50%); }
+        #crosshair::before { height: 100%; width: 2px; left: 50%; top: 0; transform: translateX(-50%); }
+
+        /* 인터페이스 */
+        .hud { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 24px; font-weight: bold; pointer-events: none; }
+    </style>
 </head>
-
-
 <body>
 
-<div class="container">
-
-<h1>☕ 커피빵</h1>
-
-<div class="subtitle">
-Oven Bound · Bagertan Character Concept
+<div id="game-screen">
+    <div class="hud">KILLS: <span id="kills">0</span></div>
+    <div id="crosshair"></div>
 </div>
 
+<script>
+    const screen = document.getElementById('game-screen');
+    const killEl = document.getElementById('kills');
+    let kills = 0;
+    let isZoomed = false;
 
-<div class="character-area">
+    // 1. 타겟 생성 (랜덤 위치)
+    function spawnTarget() {
+        const target = document.createElement('div');
+        target.className = 'target';
+        target.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+        target.style.top = Math.random() * (window.innerHeight - 70) + 'px';
+        
+        target.onclick = () => {
+            kills++;
+            killEl.innerText = kills;
+            target.remove();
+            spawnTarget();
+        };
+        
+        screen.appendChild(target);
+    }
 
-    <div class="coffee-bread">
+    // 2. 조준(ADS) - 우클릭 시 줌
+    window.oncontextmenu = (e) => {
+        e.preventDefault();
+        isZoomed = !isZoomed;
+        if (isZoomed) screen.classList.add('ads-zoom');
+        else screen.classList.remove('ads-zoom');
+    };
 
-        <!-- 빵 표면 -->
-        <div class="texture"></div>
+    // 3. 반동 효과 (발사 시 화면 흔들림)
+    window.onclick = () => {
+        screen.style.top = '-5px'; // 반동 위로 튀기
+        setTimeout(() => screen.style.top = '0px', 50);
+        
+        // 총소리 대신 "팡!" (병맛 효과음은 나중에 추가!)
+        console.log("Bang!");
+    };
 
-
-        <!-- 얼굴 -->
-        <div class="face">
-
-            <!-- 눈썹 -->
-            <div class="eyebrow left"></div>
-            <div class="eyebrow right"></div>
-
-
-            <!-- 왼쪽 눈 -->
-            <div class="eye left">
-                <div class="iris"></div>
-            </div>
-
-
-            <!-- 오른쪽 눈 -->
-            <div class="eye right">
-                <div class="iris"></div>
-            </div>
-
-
-            <!-- 코 -->
-            <div class="nose"></div>
-
-
-            <!-- 입 -->
-            <div class="mouth"></div>
-
-        </div>
-
-
-        <!-- 팔 -->
-        <div class="arm left"></div>
-        <div class="arm right"></div>
-
-
-        <!-- 다리 -->
-        <div class="leg left"></div>
-        <div class="leg right"></div>
-
-
-        <!-- 발 -->
-        <div class="foot left"></div>
-        <div class="foot right"></div>
-
-    </div>
-
-</div>
-
-
-<div class="info">
-
-    <div class="card">
-
-        <h3>몸체</h3>
-
-        캡슐형 반죽<br>
-        세로로 길쭉함<br>
-        부드러운 곡선<br>
-        커피색 계열
-
-    </div>
-
-
-    <div class="card">
-
-        <h3>얼굴</h3>
-
-        여성적인 눈매<br>
-        얇은 눈썹<br>
-        작은 코<br>
-        작고 부드러운 미소
-
-    </div>
-
-
-    <div class="card">
-
-        <h3>색상</h3>
-
-        <p>
-            <span class="color"
-                  style="background:#714832"></span>
-            Coffee Dough
-        </p>
-
-        <p>
-            <span class="color"
-                  style="background:#351d15"></span>
-            Face
-        </p>
-
-        <p>
-            <span class="color"
-                  style="background:#f0ddd0"></span>
-            Eye
-        </p>
-
-    </div>
-
-</div>
-
-</div>
-
+    // 시작 시 타겟 3개 생성
+    for(let i=0; i<3; i++) spawnTarget();
+</script>
 </body>
-        </html>
+</html>
