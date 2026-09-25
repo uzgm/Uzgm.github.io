@@ -1,0 +1,3290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>Oven Bound Car Drive Simulator</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #10151b;
+    font-family: Arial, sans-serif;
+}
+
+#game {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+
+    color: white;
+
+    z-index: 20;
+
+    pointer-events: none;
+
+    text-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+#carName {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#speed {
+    margin-top: 4px;
+
+    font-size: 44px;
+    line-height: 1;
+
+    font-weight: bold;
+}
+
+#speedUnit {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+#gear {
+    margin-top: 7px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#mapInfo {
+    margin-top: 6px;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+
+/* =========================================================
+   차량 선택
+========================================================= */
+
+#selector {
+    position: absolute;
+
+    top: 15px;
+    right: 15px;
+
+    z-index: 30;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.carButton {
+    min-width: 200px;
+
+    padding: 9px 12px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.2);
+
+    border-radius: 8px;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    backdrop-filter: blur(8px);
+}
+
+.carButton.active {
+    background:
+        rgba(255, 190, 40, 0.9);
+
+    color: #111;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   새 맵
+========================================================= */
+
+#newMap {
+    position: absolute;
+
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 40;
+
+    padding: 11px 16px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.25);
+
+    border-radius: 8px;
+
+    background:
+        rgba(0, 0, 0, 0.65);
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   모바일 조작
+========================================================= */
+
+#mobileControls {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 18px;
+
+    z-index: 50;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 0 20px;
+
+    pointer-events: none;
+}
+
+.controlGroup {
+    display: flex;
+
+    gap: 10px;
+
+    pointer-events: auto;
+}
+
+.controlButton {
+    width: 68px;
+    height: 68px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.25);
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    color: white;
+
+    font-size: 25px;
+
+    backdrop-filter: blur(8px);
+
+    touch-action: none;
+}
+
+.controlButton:active {
+    background:
+        rgba(255, 190, 40, 0.85);
+
+    color: black;
+}
+
+
+/* =========================================================
+   모바일
+========================================================= */
+
+@media (max-width: 700px) {
+
+    #selector {
+        top: auto;
+        bottom: 105px;
+        right: 10px;
+
+        max-height: 220px;
+
+        overflow-y: auto;
+    }
+
+    .carButton {
+        min-width: 160px;
+        font-size: 11px;
+        padding: 7px 9px;
+    }
+
+    #speed {
+        font-size: 36px;
+    }
+
+    #mapInfo {
+        display: none;
+    }
+
+    #newMap {
+        right: 10px;
+        bottom: 105px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="game">
+
+    <!-- HUD -->
+
+    <div id="hud">
+
+        <div id="carName">
+            바스토
+        </div>
+
+        <div id="speed">
+            0
+        </div>
+
+        <div id="speedUnit">
+            km/h
+        </div>
+
+        <div id="gear">
+            P
+        </div>
+
+        <div id="mapInfo">
+            랜덤 맵 생성 중...
+        </div>
+
+    </div>
+
+
+    <!-- 차량 선택 -->
+
+    <div id="selector"></div>
+
+
+    <!-- 새 맵 -->
+
+    <button id="newMap">
+        새로운 맵 생성
+    </button>
+
+
+    <!-- 모바일 조작 -->
+
+    <div id="mobileControls">
+
+        <div class="controlGroup">
+
+            <button
+                class="controlButton"
+                id="left"
+            >
+                ◀
+            </button>
+
+            <button
+                class="controlButton"
+                id="right"
+            >
+                ▶
+            </button>
+
+        </div>
+
+
+        <div class="controlGroup">
+
+            <button
+                class="controlButton"
+                id="brake"
+            >
+                ■
+            </button>
+
+            <button
+                class="controlButton"
+                id="gas"
+            >
+                ▲
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="module">
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+
+/* =========================================================
+   차량 데이터
+========================================================= */
+
+const cars = [
+
+    {
+        name: "바스토",
+        fullName: "바게루타이나 스프린트릴 토마토카",
+
+        type: "SUV",
+
+        acceleration: 3,
+        topSpeed: 180,
+        torque: 215,
+
+        mass: 1750,
+
+        width: 2.0,
+        height: 1.65,
+        length: 4.5,
+
+        grip: 0.86
+    },
+
+
+    {
+        name: "바토빈",
+        fullName: "바게트리 토나멘토라 빈트로나이즈",
+
+        type: "SEDAN",
+
+        acceleration: 6,
+        topSpeed: 210,
+        torque: 180,
+
+        mass: 1350,
+
+        width: 1.78,
+        height: 1.42,
+        length: 4.3,
+
+        grip: 0.92
+    },
+
+
+    {
+        name: "바티",
+        fullName: "바게루 티모나",
+
+        type: "MINI",
+
+        acceleration: 2,
+        topSpeed: 150,
+        torque: 91,
+
+        mass: 850,
+
+        width: 1.55,
+        height: 1.48,
+        length: 3.25,
+
+        grip: 0.88
+    },
+
+
+    {
+        name: "바타키",
+        fullName: "바게루게토빅 타오란 키모오라나",
+
+        type: "BUS",
+
+        acceleration: 1,
+        topSpeed: 170,
+        torque: 350,
+
+        mass: 8500,
+
+        width: 2.55,
+        height: 3.25,
+        length: 11.0,
+
+        grip: 0.68
+    },
+
+
+    {
+        name: "바바바",
+        fullName: "바게루탄 바게테버 바게테부카",
+
+        type: "BIG SUV",
+
+        acceleration: 4,
+        topSpeed: 210,
+        torque: 230,
+
+        mass: 2300,
+
+        width: 2.15,
+        height: 1.85,
+        length: 5.1,
+
+        grip: 0.82
+    },
+
+
+    {
+        name: "바시루",
+        fullName: "바게루아나 시아나 루코키치",
+
+        type: "TRUCK",
+
+        acceleration: 2.5,
+        topSpeed: 170,
+        torque: 100,
+
+        mass: 2100,
+
+        width: 1.9,
+        height: 2.0,
+        length: 5.0,
+
+        grip: 0.72
+    }
+
+];
+
+
+/* =========================================================
+   THREE 기본 설정
+========================================================= */
+
+const scene =
+    new THREE.Scene();
+
+scene.background =
+    new THREE.Color(
+        0x9fc5df
+    );
+
+scene.fog =
+    new THREE.Fog(
+        0x9fc5df,
+        180,
+        1000
+    );
+
+
+const camera =
+    new THREE.PerspectiveCamera(
+        65,
+        window.innerWidth /
+        window.innerHeight,
+
+        0.05,
+        2000
+    );
+
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true
+    });
+
+
+renderer.setPixelRatio(
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+);
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.shadowMap.enabled = true;
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+
+document
+    .getElementById("game")
+    .appendChild(
+        renderer.domElement
+    );
+
+
+/* =========================================================
+   조명
+========================================================= */
+
+const hemisphereLight =
+    new THREE.HemisphereLight(
+        0xffffff,
+        0x4d6741,
+        1.7
+    );
+
+scene.add(
+    hemisphereLight
+);
+
+
+const sun =
+    new THREE.DirectionalLight(
+        0xffffff,
+        2.0
+    );
+
+sun.position.set(
+    120,
+    180,
+    80
+);
+
+sun.castShadow = true;
+
+sun.shadow.mapSize.width =
+    2048;
+
+sun.shadow.mapSize.height =
+    2048;
+
+sun.shadow.camera.left =
+    -400;
+
+sun.shadow.camera.right =
+    400;
+
+sun.shadow.camera.top =
+    400;
+
+sun.shadow.camera.bottom =
+    -400;
+
+scene.add(
+    sun
+);
+
+
+/* =========================================================
+   월드
+========================================================= */
+
+const world =
+    new THREE.Group();
+
+scene.add(
+    world
+);
+
+
+/* =========================================================
+   랜덤
+========================================================= */
+
+function random(
+    min,
+    max
+) {
+
+    return Math.random() *
+        (max - min) +
+        min;
+
+}
+
+
+function randomInt(
+    min,
+    max
+) {
+
+    return Math.floor(
+        random(
+            min,
+            max + 1
+        )
+    );
+
+}
+
+
+/* =========================================================
+   맵 데이터
+========================================================= */
+
+let roadSegments = [];
+
+const mapLength = 2400;
+
+let mapSeed = 0;
+
+
+/* =========================================================
+   월드 제거
+========================================================= */
+
+function clearWorld() {
+
+    while (
+        world.children.length > 0
+    ) {
+
+        const child =
+            world.children[0];
+
+        world.remove(
+            child
+        );
+
+
+        child.traverse(
+            object => {
+
+                if (
+                    object.geometry
+                ) {
+
+                    object.geometry.dispose();
+
+                }
+
+
+                if (
+                    object.material
+                ) {
+
+                    if (
+                        Array.isArray(
+                            object.material
+                        )
+                    ) {
+
+                        object.material
+                            .forEach(
+                                material =>
+                                    material.dispose()
+                            );
+
+                    }
+                    else {
+
+                        object.material.dispose();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   지면
+========================================================= */
+
+function createGround() {
+
+    const geometry =
+        new THREE.PlaneGeometry(
+            3200,
+            3200
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0x557d46,
+            roughness: 1
+        });
+
+
+    const ground =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    ground.rotation.x =
+        -Math.PI / 2;
+
+
+    ground.receiveShadow =
+        true;
+
+
+    world.add(
+        ground
+    );
+
+}
+
+
+/* =========================================================
+   도로
+========================================================= */
+
+function createRoad() {
+
+    roadSegments = [];
+
+
+    let position =
+        new THREE.Vector3(
+            0,
+            0,
+            0
+        );
+
+
+    let heading = 0;
+
+
+    const segmentLength = 30;
+
+
+    const segmentCount =
+        Math.floor(
+            mapLength /
+            segmentLength
+        );
+
+
+    for (
+        let i = 0;
+        i < segmentCount;
+        i++
+    ) {
+
+        /*
+         * 일정 구간마다
+         * 도로 방향을 조금씩 변경
+         */
+
+        if (
+            i > 8 &&
+            i % randomInt(
+                7,
+                14
+            ) === 0
+        ) {
+
+            heading +=
+                random(
+                    -0.22,
+                    0.22
+                );
+
+        }
+
+
+        const center =
+            position.clone();
+
+
+        /*
+         * 도로
+         */
+
+        const road =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    16,
+                    0.18,
+                    segmentLength + 1
+                ),
+
+                new THREE.MeshStandardMaterial({
+                    color: 0x303238,
+                    roughness: 0.95
+                })
+            );
+
+
+        road.position.copy(
+            center
+        );
+
+
+        road.rotation.y =
+            heading;
+
+
+        road.receiveShadow =
+            true;
+
+
+        world.add(
+            road
+        );
+
+
+        /*
+         * 중앙선
+         */
+
+        const centerLine =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    0.22,
+                    0.035,
+                    4.5
+                ),
+
+                new THREE.MeshStandardMaterial({
+                    color: 0xf0d54a
+                })
+            );
+
+
+        centerLine.position.copy(
+            center
+        );
+
+        centerLine.position.y =
+            0.12;
+
+
+        centerLine.rotation.y =
+            heading;
+
+
+        world.add(
+            centerLine
+        );
+
+
+        /*
+         * 도로 양쪽 선
+         */
+
+        for (
+            const side of [-1, 1]
+        ) {
+
+            const edge =
+                new THREE.Mesh(
+                    new THREE.BoxGeometry(
+                        0.16,
+                        0.035,
+                        segmentLength
+                    ),
+
+                    new THREE.MeshStandardMaterial({
+                        color: 0xe7e7e7
+                    })
+                );
+
+
+            edge.position.copy(
+                center
+            );
+
+
+            const right =
+                new THREE.Vector3(
+                    Math.cos(
+                        heading
+                    ),
+                    0,
+                    -Math.sin(
+                        heading
+                    )
+                );
+
+
+            /*
+             * 로컬 X축 방향으로
+             * 도로 가장자리 배치
+             */
+
+            edge.position.add(
+                right.multiplyScalar(
+                    7.5 * side
+                )
+            );
+
+
+            edge.position.y =
+                0.12;
+
+
+            edge.rotation.y =
+                heading;
+
+
+            world.add(
+                edge
+            );
+
+        }
+
+
+        roadSegments.push({
+            position:
+                center.clone(),
+
+            heading:
+                heading
+        });
+
+
+        /*
+         * 다음 도로 위치
+         *
+         * 차량의 앞 방향은
+         * 로컬 -Z
+         */
+
+        position.x +=
+            Math.sin(
+                heading
+            ) *
+            segmentLength;
+
+
+        position.z +=
+            Math.cos(
+                heading
+            ) *
+            segmentLength;
+
+    }
+
+}
+
+
+/* =========================================================
+   나무
+========================================================= */
+
+function createTree(
+    position
+) {
+
+    const group =
+        new THREE.Group();
+
+
+    const trunk =
+        new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                0.25,
+                0.35,
+                2.5,
+                8
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0x67452e
+            })
+        );
+
+
+    trunk.position.y =
+        1.25;
+
+
+    trunk.castShadow =
+        true;
+
+
+    group.add(
+        trunk
+    );
+
+
+    const crown =
+        new THREE.Mesh(
+            new THREE.IcosahedronGeometry(
+                random(
+                    1.4,
+                    2.4
+                ),
+                1
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0x315d37
+            })
+        );
+
+
+    crown.position.y =
+        random(
+            2.7,
+            3.5
+        );
+
+
+    crown.castShadow =
+        true;
+
+
+    group.add(
+        crown
+    );
+
+
+    group.position.copy(
+        position
+    );
+
+
+    world.add(
+        group
+    );
+
+}
+
+
+/* =========================================================
+   건물
+========================================================= */
+
+function createBuilding(
+    position
+) {
+
+    const width =
+        random(
+            5,
+            16
+        );
+
+
+    const depth =
+        random(
+            5,
+            16
+        );
+
+
+    const height =
+        random(
+            4,
+            25
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color:
+                new THREE.Color(
+                    random(
+                        0.35,
+                        0.75
+                    ),
+
+                    random(
+                        0.35,
+                        0.75
+                    ),
+
+                    random(
+                        0.35,
+                        0.75
+                    )
+                ),
+
+            roughness: 0.85
+        });
+
+
+    const building =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                width,
+                height,
+                depth
+            ),
+
+            material
+        );
+
+
+    building.position.set(
+        position.x,
+        height / 2,
+        position.z
+    );
+
+
+    building.castShadow =
+        true;
+
+
+    building.receiveShadow =
+        true;
+
+
+    world.add(
+        building
+    );
+
+}
+
+
+/* =========================================================
+   가로등
+========================================================= */
+
+function createLamp(
+    position
+) {
+
+    const group =
+        new THREE.Group();
+
+
+    const pole =
+        new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                0.08,
+                0.12,
+                5,
+                8
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0x25282b,
+                metalness: 0.7,
+                roughness: 0.4
+            })
+        );
+
+
+    pole.position.y =
+        2.5;
+
+
+    group.add(
+        pole
+    );
+
+
+    const light =
+        new THREE.Mesh(
+            new THREE.SphereGeometry(
+                0.22,
+                8,
+                8
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0xffe7a8,
+                emissive: 0xffc65b,
+                emissiveIntensity: 1.7
+            })
+        );
+
+
+    light.position.y =
+        5.05;
+
+
+    group.add(
+        light
+    );
+
+
+    group.position.copy(
+        position
+    );
+
+
+    world.add(
+        group
+    );
+
+}
+
+
+/* =========================================================
+   환경 생성
+========================================================= */
+
+function populateEnvironment() {
+
+    for (
+        let i = 0;
+        i < roadSegments.length;
+        i++
+    ) {
+
+        const segment =
+            roadSegments[i];
+
+
+        const center =
+            segment.position;
+
+
+        const heading =
+            segment.heading;
+
+
+        /*
+         * 도로의 로컬 X축
+         */
+
+        const right =
+            new THREE.Vector3(
+                Math.cos(
+                    heading
+                ),
+                0,
+                -Math.sin(
+                    heading
+                )
+            );
+
+
+        /*
+         * 좌우 환경
+         */
+
+        for (
+            const side of [-1, 1]
+        ) {
+
+            const distance =
+                random(
+                    15,
+                    38
+                );
+
+
+            const position =
+                center.clone().add(
+                    right.clone()
+                        .multiplyScalar(
+                            distance * side
+                        )
+                );
+
+
+            /*
+             * 건물 / 나무
+             */
+
+            if (
+                Math.random() < 0.20
+            ) {
+
+                createBuilding(
+                    position
+                );
+
+            }
+            else {
+
+                createTree(
+                    position
+                );
+
+            }
+
+
+            /*
+             * 먼 나무
+             */
+
+            if (
+                Math.random() < 0.35
+            ) {
+
+                const farPosition =
+                    center.clone().add(
+                        right.clone()
+                            .multiplyScalar(
+                                random(
+                                    40,
+                                    85
+                                ) * side
+                            )
+                    );
+
+
+                createTree(
+                    farPosition
+                );
+
+            }
+
+        }
+
+
+        /*
+         * 가로등
+         */
+
+        if (
+            i % 4 === 0
+        ) {
+
+            const side =
+                Math.random() > 0.5
+                    ? 1
+                    : -1;
+
+
+            const lampPosition =
+                center.clone().add(
+                    right.clone()
+                        .multiplyScalar(
+                            9 * side
+                        )
+                );
+
+
+            createLamp(
+                lampPosition
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   맵 생성
+========================================================= */
+
+function generateMap() {
+
+    clearWorld();
+
+    mapSeed =
+        Math.floor(
+            Math.random() *
+            1000000
+        );
+
+
+    createGround();
+
+    createRoad();
+
+    populateEnvironment();
+
+
+    document.getElementById(
+        "mapInfo"
+    ).textContent =
+        `랜덤 맵 #${mapSeed} · 약 ${mapLength}m`;
+
+}
+
+
+/* =========================================================
+   차량
+========================================================= */
+
+let selectedCarIndex = 0;
+
+let carData =
+    cars[0];
+
+let carObject = null;
+
+
+/* =========================================================
+   차량 모델
+========================================================= */
+
+function createCar(
+    data
+) {
+
+    const car =
+        new THREE.Group();
+
+
+    /*
+     * 차체
+     */
+
+    const body =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                data.width,
+                data.height * 0.45,
+                data.length
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0xc93636,
+                roughness: 0.65
+            })
+        );
+
+
+    body.position.y =
+        data.height * 0.45;
+
+
+    body.castShadow =
+        true;
+
+
+    car.add(
+        body
+    );
+
+
+    /*
+     * 캐빈
+     */
+
+    let cabinLength =
+        data.length * 0.48;
+
+
+    let cabinHeight =
+        data.height * 0.38;
+
+
+    const cabin =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                data.width * 0.82,
+                cabinHeight,
+                cabinLength
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color: 0x242a31,
+                roughness: 0.35,
+                metalness: 0.1
+            })
+        );
+
+
+    cabin.position.y =
+        data.height * 0.80;
+
+
+    cabin.position.z =
+        data.length * 0.04;
+
+
+    cabin.castShadow =
+        true;
+
+
+    car.add(
+        cabin
+    );
+
+
+    /*
+     * 버스
+     */
+
+    if (
+        data.type === "BUS"
+    ) {
+
+        cabin.scale.z =
+            1.8;
+
+        cabin.position.z =
+            0;
+
+    }
+
+
+    /*
+     * 트럭 적재함
+     */
+
+    if (
+        data.type === "TRUCK"
+    ) {
+
+        const cargo =
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    data.width * 0.94,
+                    data.height * 0.55,
+                    data.length * 0.48
+                ),
+
+                new THREE.MeshStandardMaterial({
+                    color: 0xb5b5b5,
+                    roughness: 0.85
+                })
+            );
+
+
+        cargo.position.y =
+            data.height * 0.72;
+
+
+        cargo.position.z =
+            data.length * 0.18;
+
+
+        cargo.castShadow =
+            true;
+
+
+        car.add(
+            cargo
+        );
+
+    }
+
+
+    /*
+     * 바퀴
+     */
+
+    const wheelRadius =
+        Math.max(
+            0.34,
+            data.height * 0.20
+        );
+
+
+    const wheelGeometry =
+        new THREE.CylinderGeometry(
+            wheelRadius,
+            wheelRadius,
+            0.22,
+            16
+        );
+
+
+    const wheelMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0x161616,
+            roughness: 0.9
+        });
+
+
+    const wheelPositions = [
+
+        [
+            -data.width * 0.53,
+            wheelRadius,
+            -data.length * 0.32
+        ],
+
+        [
+            data.width * 0.53,
+            wheelRadius,
+            -data.length * 0.32
+        ],
+
+        [
+            -data.width * 0.53,
+            wheelRadius,
+            data.length * 0.32
+        ],
+
+        [
+            data.width * 0.53,
+            wheelRadius,
+            data.length * 0.32
+        ]
+
+    ];
+
+
+    for (
+        const position of wheelPositions
+    ) {
+
+        const wheel =
+            new THREE.Mesh(
+                wheelGeometry,
+                wheelMaterial
+            );
+
+
+        wheel.rotation.z =
+            Math.PI / 2;
+
+
+        wheel.position.set(
+            position[0],
+            position[1],
+            position[2]
+        );
+
+
+        wheel.castShadow =
+            true;
+
+
+        car.add(
+            wheel
+        );
+
+    }
+
+
+    /*
+     * 전조등
+     */
+
+    const lightMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            emissive: 0xffffff,
+            emissiveIntensity: 2
+        });
+
+
+    for (
+        const side of [-1, 1]
+    ) {
+
+        const headlight =
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    data.width * 0.14,
+                    0.14,
+                    0.08
+                ),
+
+                lightMaterial
+            );
+
+
+        headlight.position.set(
+
+            side *
+            data.width *
+            0.30,
+
+            data.height *
+            0.47,
+
+            -data.length *
+            0.505
+
+        );
+
+
+        car.add(
+            headlight
+        );
+
+    }
+
+
+    return car;
+
+}
+
+
+/* =========================================================
+   차량 선택 UI
+========================================================= */
+
+const selector =
+    document.getElementById(
+        "selector"
+    );
+
+
+cars.forEach(
+    (
+        car,
+        index
+    ) => {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "carButton";
+
+
+        button.innerHTML =
+            `<strong>${car.name}</strong>
+            · ${car.type}
+            · ${car.topSpeed} km/h`;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectCar(
+                    index
+                );
+
+            }
+        );
+
+
+        selector.appendChild(
+            button
+        );
+
+    }
+);
+
+
+function updateSelector() {
+
+    [
+        ...selector.children
+    ].forEach(
+        (
+            button,
+            index
+        ) => {
+
+            button.classList.toggle(
+                "active",
+                index ===
+                selectedCarIndex
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   차량 선택
+========================================================= */
+
+function selectCar(
+    index
+) {
+
+    selectedCarIndex =
+        index;
+
+
+    carData =
+        cars[index];
+
+
+    if (
+        carObject
+    ) {
+
+        scene.remove(
+            carObject
+        );
+
+    }
+
+
+    carObject =
+        createCar(
+            carData
+        );
+
+
+    /*
+     * 도로 시작점
+     */
+
+    const start =
+        roadSegments[
+            Math.min(
+                2,
+                roadSegments.length - 1
+            )
+        ];
+
+
+    carObject.position.copy(
+        start.position
+    );
+
+
+    carObject.position.y =
+        0.05;
+
+
+    /*
+     * 도로 방향과 차량 방향 일치
+     */
+
+    carObject.rotation.y =
+        start.heading;
+
+
+    scene.add(
+        carObject
+    );
+
+
+    /*
+     * 차량 상태 초기화
+     */
+
+    speed = 0;
+
+    steering = 0;
+
+    carSteeringAngle = 0;
+
+    lateralVelocity = 0;
+
+
+    document.getElementById(
+        "carName"
+    ).textContent =
+        carData.name;
+
+
+    updateSelector();
+
+}
+
+
+/* =========================================================
+   차량 물리 변수
+========================================================= */
+
+let speed = 0;
+
+
+/*
+ * m/s
+ *
+ * 210 km/h =
+ * 약 58.33 m/s
+ */
+
+let steering = 0;
+
+let throttle = false;
+
+let brake = false;
+
+
+/*
+ * 횡방향 속도
+ */
+
+let lateralVelocity = 0;
+
+
+/*
+ * 실제 조향각
+ */
+
+let carSteeringAngle = 0;
+
+
+/* =========================================================
+   단위 변환
+========================================================= */
+
+function kmhToMs(
+    kmh
+) {
+
+    return kmh / 3.6;
+
+}
+
+
+function msToKmh(
+    ms
+) {
+
+    return ms * 3.6;
+
+}
+
+
+/* =========================================================
+   최대속도
+========================================================= */
+
+function getMaxSpeed() {
+
+    return kmhToMs(
+        carData.topSpeed
+    );
+
+}
+
+
+/* =========================================================
+   엔진 가속
+========================================================= */
+
+function calculateAcceleration() {
+
+    const maxSpeed =
+        getMaxSpeed();
+
+
+    const speedRatio =
+        Math.min(
+            1,
+            Math.abs(speed) /
+            maxSpeed
+        );
+
+
+    /*
+     * acceleration 값
+     *
+     * 1 ~ 6
+     */
+
+    const baseAcceleration =
+        1.4 +
+        carData.acceleration *
+        1.45;
+
+
+    /*
+     * 토크
+     *
+     * 실제 자동차의 Nm처럼
+     * 저속에서 큰 영향을 주고
+     * 고속에서 영향 감소
+     */
+
+    const torqueRatio =
+        THREE.MathUtils.clamp(
+            carData.torque /
+            220,
+            0.5,
+            1.6
+        );
+
+
+    const torqueEffect =
+        THREE.MathUtils.lerp(
+            1.25,
+            0.35,
+            speedRatio
+        );
+
+
+    /*
+     * 고속 공기저항
+     */
+
+    const drag =
+        1 -
+        speedRatio *
+        speedRatio *
+        0.55;
+
+
+    return (
+        baseAcceleration *
+        torqueRatio *
+        torqueEffect *
+        drag
+    );
+
+}
+
+
+/* =========================================================
+   조향
+========================================================= */
+
+function updateSteering(
+    dt
+) {
+
+    const absoluteSpeed =
+        Math.abs(speed);
+
+
+    const maxSpeed =
+        getMaxSpeed();
+
+
+    const speedRatio =
+        THREE.MathUtils.clamp(
+            absoluteSpeed /
+            maxSpeed,
+            0,
+            1
+        );
+
+
+    /*
+     * 고속일수록
+     * 조향 반응 감소
+     */
+
+    const steeringAuthority =
+        THREE.MathUtils.lerp(
+            1.0,
+            0.32,
+            speedRatio
+        );
+
+
+    const targetSteering =
+        steering *
+        steeringAuthority;
+
+
+    carSteeringAngle =
+        THREE.MathUtils.damp(
+            carSteeringAngle,
+
+            targetSteering,
+
+            7,
+
+            dt
+        );
+
+
+    /*
+     * 차량 길이에 따른
+     * 회전 반응
+     */
+
+    const wheelBase =
+        Math.max(
+            2.0,
+            carData.length *
+            0.58
+        );
+
+
+    /*
+     * 최대 조향각
+     */
+
+    const steeringAngle =
+        carSteeringAngle *
+        THREE.MathUtils.degToRad(
+            31
+        );
+
+
+    /*
+     * Bicycle model
+     */
+
+    if (
+        Math.abs(speed) >
+        0.1
+    ) {
+
+        const yawRate =
+            Math.tan(
+                steeringAngle
+            ) /
+            wheelBase *
+            speed;
+
+
+        carObject.rotation.y -=
+            yawRate *
+            dt;
+
+    }
+
+
+    /*
+     * 횡방향 미끄러짐
+     */
+
+    const slip =
+        Math.abs(speed) *
+        Math.abs(
+            carSteeringAngle
+        ) *
+        0.06;
+
+
+    lateralVelocity +=
+        slip *
+        Math.sign(
+            carSteeringAngle
+        ) *
+        dt;
+
+
+    /*
+     * 차량별 그립
+     */
+
+    lateralVelocity *=
+        Math.pow(
+            carData.grip,
+            dt * 9
+        );
+
+}
+
+
+/* =========================================================
+   입력
+========================================================= */
+
+const keys = {};
+
+
+/*
+ * 모바일 입력은
+ * 키보드와 별도로 저장
+ */
+
+let mobileSteering = 0;
+
+let mobileThrottle = false;
+
+let mobileBrake = false;
+
+
+/* =========================================================
+   키보드
+========================================================= */
+
+window.addEventListener(
+    "keydown",
+    event => {
+
+        keys[
+            event.code
+        ] = true;
+
+
+        /*
+         * 숫자키 차량 변경
+         */
+
+        if (
+            event.code.startsWith(
+                "Digit"
+            )
+        ) {
+
+            const index =
+                parseInt(
+                    event.code.replace(
+                        "Digit",
+                        ""
+                    )
+                ) - 1;
+
+
+            if (
+                index >= 0 &&
+                index <
+                cars.length
+            ) {
+
+                selectCar(
+                    index
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "keyup",
+    event => {
+
+        keys[
+            event.code
+        ] = false;
+
+    }
+);
+
+
+/* =========================================================
+   입력 통합
+========================================================= */
+
+function updateInput() {
+
+    let keyboardSteering = 0;
+
+    let keyboardThrottle =
+        false;
+
+    let keyboardBrake =
+        false;
+
+
+    /*
+     * 좌회전
+     */
+
+    if (
+        keys["KeyA"] ||
+        keys["ArrowLeft"]
+    ) {
+
+        keyboardSteering -= 1;
+
+    }
+
+
+    /*
+     * 우회전
+     */
+
+    if (
+        keys["KeyD"] ||
+        keys["ArrowRight"]
+    ) {
+
+        keyboardSteering += 1;
+
+    }
+
+
+    /*
+     * 가속
+     */
+
+    if (
+        keys["KeyW"] ||
+        keys["ArrowUp"]
+    ) {
+
+        keyboardThrottle =
+            true;
+
+    }
+
+
+    /*
+     * 브레이크
+     */
+
+    if (
+        keys["Space"]
+    ) {
+
+        keyboardBrake =
+            true;
+
+    }
+
+
+    /*
+     * S / 아래 방향키
+     */
+
+    if (
+        keys["KeyS"] ||
+        keys["ArrowDown"]
+    ) {
+
+        /*
+         * 움직이고 있으면
+         * 브레이크
+         */
+
+        if (
+            speed >
+            0.5
+        ) {
+
+            keyboardBrake =
+                true;
+
+        }
+
+        /*
+         * 정지 상태면
+         * 후진
+         */
+
+        else {
+
+            keyboardThrottle =
+                true;
+
+        }
+
+    }
+
+
+    /*
+     * PC 입력 우선
+     *
+     * 모바일도 동시에 사용 가능
+     */
+
+    if (
+        keyboardSteering !== 0
+    ) {
+
+        steering =
+            keyboardSteering;
+
+    }
+    else {
+
+        steering =
+            mobileSteering;
+
+    }
+
+
+    throttle =
+        keyboardThrottle ||
+        mobileThrottle;
+
+
+    brake =
+        keyboardBrake ||
+        mobileBrake;
+
+}
+
+
+/* =========================================================
+   모바일 버튼
+========================================================= */
+
+function holdButton(
+    element,
+    start,
+    end
+) {
+
+    element.addEventListener(
+        "pointerdown",
+        event => {
+
+            event.preventDefault();
+
+            try {
+
+                element.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+            catch {}
+
+            start();
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointerup",
+        event => {
+
+            event.preventDefault();
+
+            end();
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointercancel",
+        () => {
+
+            end();
+
+        }
+    );
+
+
+    element.addEventListener(
+        "lostpointercapture",
+        () => {
+
+            end();
+
+        }
+    );
+
+}
+
+
+/*
+ * 왼쪽
+ */
+
+holdButton(
+
+    document.getElementById(
+        "left"
+    ),
+
+    () => {
+
+        mobileSteering =
+            -1;
+
+    },
+
+    () => {
+
+        if (
+            mobileSteering < 0
+        ) {
+
+            mobileSteering =
+                0;
+
+        }
+
+    }
+
+);
+
+
+/*
+ * 오른쪽
+ */
+
+holdButton(
+
+    document.getElementById(
+        "right"
+    ),
+
+    () => {
+
+        mobileSteering =
+            1;
+
+    },
+
+    () => {
+
+        if (
+            mobileSteering > 0
+        ) {
+
+            mobileSteering =
+                0;
+
+        }
+
+    }
+
+);
+
+
+/*
+ * 가속
+ */
+
+holdButton(
+
+    document.getElementById(
+        "gas"
+    ),
+
+    () => {
+
+        mobileThrottle =
+            true;
+
+    },
+
+    () => {
+
+        mobileThrottle =
+            false;
+
+    }
+
+);
+
+
+/*
+ * 브레이크
+ */
+
+holdButton(
+
+    document.getElementById(
+        "brake"
+    ),
+
+    () => {
+
+        mobileBrake =
+            true;
+
+    },
+
+    () => {
+
+        mobileBrake =
+            false;
+
+    }
+
+);
+
+
+/* =========================================================
+   차량 업데이트
+========================================================= */
+
+function updateCar(
+    dt
+) {
+
+    if (
+        !carObject
+    ) {
+
+        return;
+
+    }
+
+
+    updateInput();
+
+
+    const maxSpeed =
+        getMaxSpeed();
+
+
+    /*
+     * =====================================================
+     * 가속
+     * =====================================================
+     */
+
+    if (
+        throttle
+    ) {
+
+        /*
+         * 후진에서 가속 버튼을 누르면
+         * 먼저 정방향으로 전환
+         */
+
+        if (
+            speed < -0.5
+        ) {
+
+            speed +=
+                12 *
+                dt;
+
+        }
+
+        else {
+
+            const acceleration =
+                calculateAcceleration();
+
+
+            speed +=
+                acceleration *
+                dt;
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * 자연 감속
+     * =====================================================
+     */
+
+    if (
+        !throttle &&
+        !brake
+    ) {
+
+        /*
+         * 공기저항
+         */
+
+        const aerodynamicDrag =
+            Math.abs(speed) *
+            Math.abs(speed) *
+            0.002;
+
+
+        /*
+         * 구름저항
+         */
+
+        const rollingResistance =
+            0.35;
+
+
+        const deceleration =
+            (
+                rollingResistance +
+                aerodynamicDrag
+            ) *
+            dt;
+
+
+        if (
+            speed > 0
+        ) {
+
+            speed -=
+                deceleration;
+
+
+            if (
+                speed < 0
+            ) {
+
+                speed = 0;
+
+            }
+
+        }
+
+        else if (
+            speed < 0
+        ) {
+
+            speed +=
+                deceleration;
+
+
+            if (
+                speed > 0
+            ) {
+
+                speed = 0;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * 브레이크
+     * =====================================================
+     */
+
+    if (
+        brake
+    ) {
+
+        const brakePower =
+            speed > 0
+                ? 13
+                : 8;
+
+
+        if (
+            speed > 0
+        ) {
+
+            speed -=
+                brakePower *
+                dt;
+
+
+            if (
+                speed < 0
+            ) {
+
+                speed = 0;
+
+            }
+
+        }
+
+        else if (
+            speed < 0
+        ) {
+
+            speed +=
+                brakePower *
+                dt;
+
+
+            if (
+                speed > 0
+            ) {
+
+                speed = 0;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * 속도 제한
+     * =====================================================
+     */
+
+    speed =
+        THREE.MathUtils.clamp(
+
+            speed,
+
+            -kmhToMs(35),
+
+            maxSpeed
+
+        );
+
+
+    /*
+     * =====================================================
+     * 조향
+     * =====================================================
+     */
+
+    updateSteering(
+        dt
+    );
+
+
+    /*
+     * =====================================================
+     * 차량 이동
+     * =====================================================
+     */
+
+    const forward =
+        new THREE.Vector3(
+            0,
+            0,
+            -1
+        );
+
+
+    forward.applyQuaternion(
+        carObject.quaternion
+    );
+
+
+    carObject.position.add(
+        forward.multiplyScalar(
+            speed *
+            dt
+        )
+    );
+
+
+    /*
+     * 횡방향 이동
+     */
+
+    const right =
+        new THREE.Vector3(
+            1,
+            0,
+            0
+        );
+
+
+    right.applyQuaternion(
+        carObject.quaternion
+    );
+
+
+    carObject.position.add(
+        right.multiplyScalar(
+            lateralVelocity *
+            dt
+        )
+    );
+
+
+    /*
+     * 차량 높이
+     */
+
+    carObject.position.y =
+        0.05;
+
+
+    /*
+     * 차체 롤
+     */
+
+    const targetRoll =
+        -carSteeringAngle *
+        Math.min(
+            0.11,
+            Math.abs(speed) *
+            0.0022
+        );
+
+
+    carObject.rotation.z =
+        THREE.MathUtils.damp(
+
+            carObject.rotation.z,
+
+            targetRoll,
+
+            5,
+
+            dt
+
+        );
+
+}
+
+
+/* =========================================================
+   카메라
+========================================================= */
+
+const cameraPosition =
+    new THREE.Vector3();
+
+
+const cameraLook =
+    new THREE.Vector3();
+
+
+function updateCamera(
+    dt
+) {
+
+    if (
+        !carObject
+    ) {
+
+        return;
+
+    }
+
+
+    const speedKmh =
+        Math.abs(
+            msToKmh(
+                speed
+            )
+        );
+
+
+    const speedRatio =
+        THREE.MathUtils.clamp(
+
+            speedKmh /
+            carData.topSpeed,
+
+            0,
+
+            1
+
+        );
+
+
+    /*
+     * 고속일수록
+     * 카메라가 뒤로 빠짐
+     */
+
+    const distance =
+        THREE.MathUtils.lerp(
+
+            8,
+
+            13,
+
+            speedRatio
+
+        );
+
+
+    const height =
+        THREE.MathUtils.lerp(
+
+            4.2,
+
+            5.3,
+
+            speedRatio
+
+        );
+
+
+    const offset =
+        new THREE.Vector3(
+            0,
+            height,
+            distance
+        );
+
+
+    offset.applyQuaternion(
+        carObject.quaternion
+    );
+
+
+    const target =
+        carObject.position
+            .clone()
+            .add(
+                offset
+            );
+
+
+    /*
+     * 부드러운 카메라
+     */
+
+    const cameraSmooth =
+        1 -
+        Math.pow(
+            0.0005,
+            dt
+        );
+
+
+    cameraPosition.lerp(
+        target,
+        cameraSmooth
+    );
+
+
+    camera.position.copy(
+        cameraPosition
+    );
+
+
+    /*
+     * 차량 앞쪽을 바라봄
+     */
+
+    const forward =
+        new THREE.Vector3(
+            0,
+            0,
+            -1
+        );
+
+
+    forward.applyQuaternion(
+        carObject.quaternion
+    );
+
+
+    cameraLook.copy(
+        carObject.position
+    );
+
+
+    cameraLook.add(
+        forward.multiplyScalar(
+
+            THREE.MathUtils.lerp(
+                7,
+                18,
+                speedRatio
+            )
+
+        )
+    );
+
+
+    cameraLook.y +=
+        1.0;
+
+
+    camera.lookAt(
+        cameraLook
+    );
+
+
+    /*
+     * FOV 변화
+     *
+     * 저속 65
+     * 고속 86
+     */
+
+    const targetFOV =
+        THREE.MathUtils.lerp(
+
+            65,
+
+            86,
+
+            speedRatio
+
+        );
+
+
+    camera.fov =
+        THREE.MathUtils.damp(
+
+            camera.fov,
+
+            targetFOV,
+
+            4,
+
+            dt
+
+        );
+
+
+    camera.updateProjectionMatrix();
+
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+function updateHUD() {
+
+    const kmh =
+        Math.round(
+            Math.abs(
+                msToKmh(
+                    speed
+                )
+            )
+        );
+
+
+    document.getElementById(
+        "speed"
+    ).textContent =
+        kmh;
+
+
+    let gear =
+        "P";
+
+
+    if (
+        speed > 0.5
+    ) {
+
+        gear = "D";
+
+    }
+
+    else if (
+        speed < -0.5
+    ) {
+
+        gear = "R";
+
+    }
+
+
+    document.getElementById(
+        "gear"
+    ).textContent =
+        gear;
+
+}
+
+
+/* =========================================================
+   초기화
+========================================================= */
+
+generateMap();
+
+selectCar(
+    0
+);
+
+
+/* =========================================================
+   새 맵
+========================================================= */
+
+document.getElementById(
+    "newMap"
+).addEventListener(
+    "click",
+    () => {
+
+        generateMap();
+
+        selectCar(
+            selectedCarIndex
+        );
+
+    }
+);
+
+
+/* =========================================================
+   게임 루프
+========================================================= */
+
+let lastTime =
+    performance.now();
+
+
+function animate(
+    currentTime
+) {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    let dt =
+        (
+            currentTime -
+            lastTime
+        ) / 1000;
+
+
+    lastTime =
+        currentTime;
+
+
+    /*
+     * 프레임 드랍 방지
+     */
+
+    dt =
+        Math.min(
+            dt,
+            0.05
+        );
+
+
+    updateCar(
+        dt
+    );
+
+
+    updateCamera(
+        dt
+    );
+
+
+    updateHUD();
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+requestAnimationFrame(
+    animate
+);
+
+
+/* =========================================================
+   리사이즈
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
