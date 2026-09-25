@@ -1,0 +1,1773 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>레거시 바게루타이아 배틀</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* =========================
+           캐릭터 선택 화면
+        ========================= */
+
+        #selectScreen {
+            flex-direction: column;
+            align-items: center;
+            padding: 25px;
+            background:
+                radial-gradient(
+                    circle at center,
+                    #3b2415,
+                    #111 70%
+                );
+        }
+
+        .title {
+            font-size: clamp(30px, 6vw, 64px);
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 10px 0 5px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        .selectArea {
+            width: min(1100px, 95vw);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .playerSelect {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #444;
+            border-radius: 18px;
+            padding: 15px;
+            min-width: 0;
+        }
+
+        .playerTitle {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .characterGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .character {
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 12px;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .character:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+
+        .character.selected {
+            border-color: #f4b942;
+            background: #4a3214;
+        }
+
+        .characterIcon {
+            width: 70px;
+            height: 70px;
+            margin: auto;
+
+            border-radius: 18px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 38px;
+            background: #555;
+        }
+
+        .characterName {
+            margin-top: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .description {
+            height: 70px;
+
+            margin-top: 12px;
+            padding: 10px;
+
+            border-radius: 10px;
+
+            background: #181818;
+            color: #888;
+
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .startButton {
+            margin-top: 18px;
+            padding: 15px 45px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: #f4b942;
+            color: #111;
+
+            font-size: 20px;
+            font-weight: 900;
+
+            cursor: pointer;
+        }
+
+        .startButton:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           게임 화면
+        ========================= */
+
+        #gameScreen {
+            position: relative;
+            background: #222;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: min(900px, 90vw);
+
+            pointer-events: none;
+        }
+
+        .healthRow {
+            display: grid;
+            grid-template-columns: 1fr 100px 1fr;
+
+            gap: 12px;
+            align-items: center;
+        }
+
+        .healthBox {
+            height: 28px;
+
+            background: #111;
+
+            border: 3px solid white;
+            border-radius: 7px;
+
+            overflow: hidden;
+        }
+
+        .health {
+            width: 100%;
+            height: 100%;
+
+            background: #d83b3b;
+
+            transition: width 0.12s;
+        }
+
+        #health2 {
+            float: right;
+        }
+
+        .roundText {
+            text-align: center;
+
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .controlsText {
+            position: absolute;
+
+            bottom: 12px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            padding: 8px 15px;
+
+            background: rgba(0, 0, 0, 0.65);
+
+            border-radius: 10px;
+
+            font-size: 13px;
+            color: #ddd;
+
+            pointer-events: none;
+        }
+
+        #gameOver {
+            position: absolute;
+
+            inset: 0;
+
+            display: none;
+
+            justify-content: center;
+            align-items: center;
+
+            flex-direction: column;
+
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        #gameOver.active {
+            display: flex;
+        }
+
+        .winner {
+            font-size: clamp(35px, 8vw, 70px);
+
+            font-weight: 900;
+        }
+
+        .restartButton {
+            margin-top: 20px;
+
+            padding: 14px 35px;
+
+            border: none;
+            border-radius: 10px;
+
+            font-size: 18px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        /* =========================
+           모바일
+        ========================= */
+
+        @media (max-width: 700px) {
+            .selectArea {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+            }
+
+            .characterGrid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .characterIcon {
+                width: 50px;
+                height: 50px;
+                font-size: 28px;
+            }
+
+            .description {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         캐릭터 선택
+    ========================= -->
+
+    <div id="selectScreen" class="screen active">
+
+        <div class="title">
+            레거시 바게루타이아 배틀
+        </div>
+
+        <div class="subtitle">
+            LEGACY BAGERUTAIA BATTLE
+        </div>
+
+        <div class="selectArea">
+
+            <!-- PLAYER 1 -->
+
+            <div class="playerSelect">
+
+                <div class="playerTitle">
+                    PLAYER 1
+                </div>
+
+                <div
+                    class="characterGrid"
+                    id="p1Characters">
+                </div>
+
+                <div
+                    class="description"
+                    id="p1Description">
+                </div>
+
+            </div>
+
+            <!-- PLAYER 2 -->
+
+            <div class="playerSelect">
+
+                <div class="playerTitle">
+                    PLAYER 2
+                </div>
+
+                <div
+                    class="characterGrid"
+                    id="p2Characters">
+                </div>
+
+                <div
+                    class="description"
+                    id="p2Description">
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="startButton"
+            id="startButton"
+            disabled>
+
+            대전 시작
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         게임 화면
+    ========================= -->
+
+    <div id="gameScreen" class="screen">
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="hud">
+
+            <div class="healthRow">
+
+                <div class="healthBox">
+
+                    <div
+                        class="health"
+                        id="health1">
+                    </div>
+
+                </div>
+
+                <div class="roundText">
+                    VS
+                </div>
+
+                <div class="healthBox">
+
+                    <div
+                        class="health"
+                        id="health2">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="controlsText">
+
+            P1:
+            A/D 이동
+            · W 점프
+            · F 공격
+            · G 방어
+            · H 돌진
+
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+            P2:
+            ←/→ 이동
+            · ↑ 점프
+            · K 공격
+            · L 방어
+            · ; 돌진
+
+        </div>
+
+
+        <div id="gameOver">
+
+            <div
+                class="winner"
+                id="winnerText">
+
+                PLAYER 1 WIN
+
+            </div>
+
+            <button
+                class="restartButton"
+                id="restartButton">
+
+                캐릭터 선택으로
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        /* =================================================
+           캐릭터
+        ================================================= */
+
+        const characters = [
+            {
+                name: "커피빵",
+                icon: "☕"
+            },
+            {
+                name: "빈대떡",
+                icon: "🥞"
+            },
+            {
+                name: "시루떡",
+                icon: "⬜"
+            },
+            {
+                name: "번트브레드",
+                icon: "🍞"
+            },
+            {
+                name: "바로게르트",
+                icon: "🟫"
+            }
+        ];
+
+
+        /* =================================================
+           DOM
+        ================================================= */
+
+        const selectScreen =
+            document.getElementById("selectScreen");
+
+        const gameScreen =
+            document.getElementById("gameScreen");
+
+        const p1Characters =
+            document.getElementById("p1Characters");
+
+        const p2Characters =
+            document.getElementById("p2Characters");
+
+        const p1Description =
+            document.getElementById("p1Description");
+
+        const p2Description =
+            document.getElementById("p2Description");
+
+        const startButton =
+            document.getElementById("startButton");
+
+        const health1 =
+            document.getElementById("health1");
+
+        const health2 =
+            document.getElementById("health2");
+
+        const gameOver =
+            document.getElementById("gameOver");
+
+        const winnerText =
+            document.getElementById("winnerText");
+
+        const restartButton =
+            document.getElementById("restartButton");
+
+        const canvas =
+            document.getElementById("gameCanvas");
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        /* =================================================
+           캐릭터 선택 상태
+        ================================================= */
+
+        let p1Selected = null;
+        let p2Selected = null;
+
+
+        function createCharacters(
+            container,
+            player
+        ) {
+
+            container.innerHTML = "";
+
+            characters.forEach(
+                (character, index) => {
+
+                    const button =
+                        document.createElement("button");
+
+                    button.className =
+                        "character";
+
+                    button.innerHTML = `
+                        <div class="characterIcon">
+                            ${character.icon}
+                        </div>
+
+                        <div class="characterName">
+                            ${character.name}
+                        </div>
+                    `;
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            if (player === 1) {
+
+                                p1Selected = index;
+
+                                [
+                                    ...container.children
+                                ].forEach(
+                                    element =>
+                                        element.classList.remove(
+                                            "selected"
+                                        )
+                                );
+
+                                button.classList.add(
+                                    "selected"
+                                );
+
+                                p1Description.textContent =
+                                    "";
+                            }
+
+                            else {
+
+                                p2Selected = index;
+
+                                [
+                                    ...container.children
+                                ].forEach(
+                                    element =>
+                                        element.classList.remove(
+                                            "selected"
+                                        )
+                                );
+
+                                button.classList.add(
+                                    "selected"
+                                );
+
+                                p2Description.textContent =
+                                    "";
+                            }
+
+                            updateStartButton();
+
+                        }
+                    );
+
+                    container.appendChild(button);
+
+                }
+            );
+        }
+
+
+        function updateStartButton() {
+
+            startButton.disabled =
+                p1Selected === null ||
+                p2Selected === null;
+
+        }
+
+
+        createCharacters(
+            p1Characters,
+            1
+        );
+
+        createCharacters(
+            p2Characters,
+            2
+        );
+
+
+        /* =================================================
+           게임 변수
+        ================================================= */
+
+        let player1;
+        let player2;
+
+        let keys = {};
+
+        let gameRunning = false;
+
+        const GRAVITY = 0.75;
+
+        const ATTACK_DAMAGE = 10;
+
+        const ATTACK_RANGE = 75;
+
+        const MOVE_SPEED = 4;
+
+        const DASH_SPEED = 11;
+
+
+        /* =================================================
+           플레이어 생성
+        ================================================= */
+
+        function createPlayer(
+            x,
+            color,
+            name,
+            facing
+        ) {
+
+            return {
+
+                x: x,
+                y: 0,
+
+                vx: 0,
+                vy: 0,
+
+                width: 55,
+                height: 90,
+
+                health: 100,
+
+                color: color,
+                name: name,
+
+                facing: facing,
+
+                attacking: false,
+                attackTimer: 0,
+
+                defending: false,
+
+                dashing: false,
+                dashTimer: 0,
+
+                hitCooldown: 0,
+
+                onGround: true,
+
+                attackPressed: false,
+                dashPressed: false
+
+            };
+        }
+
+
+        /* =================================================
+           게임 시작
+        ================================================= */
+
+        startButton.addEventListener(
+            "click",
+            startGame
+        );
+
+
+        function startGame() {
+
+            selectScreen.classList.remove(
+                "active"
+            );
+
+            gameScreen.classList.add(
+                "active"
+            );
+
+            resizeCanvas();
+
+            player1 = createPlayer(
+                canvas.width * 0.3,
+                "#d39a63",
+                characters[p1Selected].name,
+                1
+            );
+
+            player2 = createPlayer(
+                canvas.width * 0.7,
+                "#8fa4c9",
+                characters[p2Selected].name,
+                -1
+            );
+
+            gameRunning = true;
+
+            gameOver.classList.remove(
+                "active"
+            );
+
+            updateHUD();
+
+        }
+
+
+        /* =================================================
+           키보드
+        ================================================= */
+
+        window.addEventListener(
+            "keydown",
+            event => {
+
+                keys[
+                    event.key.toLowerCase()
+                ] = true;
+
+            }
+        );
+
+
+        window.addEventListener(
+            "keyup",
+            event => {
+
+                keys[
+                    event.key.toLowerCase()
+                ] = false;
+
+            }
+        );
+
+
+        /* =================================================
+           공격
+        ================================================= */
+
+        function attack(player) {
+
+            if (!gameRunning) {
+                return;
+            }
+
+            if (player.attacking) {
+                return;
+            }
+
+            if (player.defending) {
+                return;
+            }
+
+            player.attacking = true;
+
+            player.attackTimer = 14;
+
+        }
+
+
+        /* =================================================
+           방어
+        ================================================= */
+
+        function setDefense(
+            player,
+            value
+        ) {
+
+            if (player.attacking) {
+                return;
+            }
+
+            player.defending = value;
+
+            if (value) {
+                player.vx *= 0.3;
+            }
+
+        }
+
+
+        /* =================================================
+           돌진
+        ================================================= */
+
+        function dash(player) {
+
+            if (!gameRunning) {
+                return;
+            }
+
+            if (player.dashing) {
+                return;
+            }
+
+            if (player.defending) {
+                return;
+            }
+
+            player.dashing = true;
+
+            player.dashTimer = 10;
+
+            player.vx =
+                player.facing * DASH_SPEED;
+
+        }
+
+
+        /* =================================================
+           PLAYER 1 입력
+        ================================================= */
+
+        function handlePlayer1() {
+
+            if (keys["a"]) {
+
+                player1.vx =
+                    -MOVE_SPEED;
+
+                player1.facing = -1;
+
+            }
+
+            else if (keys["d"]) {
+
+                player1.vx =
+                    MOVE_SPEED;
+
+                player1.facing = 1;
+
+            }
+
+            else if (!player1.dashing) {
+
+                player1.vx *= 0.75;
+
+            }
+
+
+            if (
+                keys["w"] &&
+                player1.onGround
+            ) {
+
+                player1.vy = -13;
+
+                player1.onGround = false;
+
+            }
+
+
+            if (keys["f"]) {
+
+                if (!player1.attackPressed) {
+                    attack(player1);
+                }
+
+                player1.attackPressed = true;
+
+            }
+            else {
+
+                player1.attackPressed = false;
+
+            }
+
+
+            setDefense(
+                player1,
+                !!keys["g"]
+            );
+
+
+            if (keys["h"]) {
+
+                if (!player1.dashPressed) {
+                    dash(player1);
+                }
+
+                player1.dashPressed = true;
+
+            }
+            else {
+
+                player1.dashPressed = false;
+
+            }
+
+        }
+
+
+        /* =================================================
+           PLAYER 2 입력
+        ================================================= */
+
+        function handlePlayer2() {
+
+            if (keys["arrowleft"]) {
+
+                player2.vx =
+                    -MOVE_SPEED;
+
+                player2.facing = -1;
+
+            }
+
+            else if (keys["arrowright"]) {
+
+                player2.vx =
+                    MOVE_SPEED;
+
+                player2.facing = 1;
+
+            }
+
+            else if (!player2.dashing) {
+
+                player2.vx *= 0.75;
+
+            }
+
+
+            if (
+                keys["arrowup"] &&
+                player2.onGround
+            ) {
+
+                player2.vy = -13;
+
+                player2.onGround = false;
+
+            }
+
+
+            if (keys["k"]) {
+
+                if (!player2.attackPressed) {
+                    attack(player2);
+                }
+
+                player2.attackPressed = true;
+
+            }
+            else {
+
+                player2.attackPressed = false;
+
+            }
+
+
+            setDefense(
+                player2,
+                !!keys["l"]
+            );
+
+
+            if (keys[";"]) {
+
+                if (!player2.dashPressed) {
+                    dash(player2);
+                }
+
+                player2.dashPressed = true;
+
+            }
+            else {
+
+                player2.dashPressed = false;
+
+            }
+
+        }
+
+
+        /* =================================================
+           플레이어 업데이트
+        ================================================= */
+
+        function updatePlayer(player) {
+
+            player.x += player.vx;
+
+            player.y += player.vy;
+
+            player.vy += GRAVITY;
+
+
+            if (player.y >= 0) {
+
+                player.y = 0;
+
+                player.vy = 0;
+
+                player.onGround = true;
+
+            }
+
+
+            if (player.x < 40) {
+                player.x = 40;
+            }
+
+
+            if (
+                player.x >
+                canvas.width - 40
+            ) {
+
+                player.x =
+                    canvas.width - 40;
+
+            }
+
+
+            if (player.attackTimer > 0) {
+
+                player.attackTimer--;
+
+                if (
+                    player.attackTimer <= 0
+                ) {
+
+                    player.attacking = false;
+
+                }
+
+            }
+
+
+            if (player.dashTimer > 0) {
+
+                player.dashTimer--;
+
+                if (
+                    player.dashTimer <= 0
+                ) {
+
+                    player.dashing = false;
+
+                }
+
+            }
+
+
+            if (player.hitCooldown > 0) {
+
+                player.hitCooldown--;
+
+            }
+
+        }
+
+
+        /* =================================================
+           공격 판정
+        ================================================= */
+
+        function attackCheck(
+            attacker,
+            target
+        ) {
+
+            if (!attacker.attacking) {
+                return;
+            }
+
+            if (
+                attacker.attackTimer !== 8
+            ) {
+                return;
+            }
+
+
+            const distance =
+                Math.abs(
+                    attacker.x -
+                    target.x
+                );
+
+
+            if (
+                distance >
+                ATTACK_RANGE
+            ) {
+                return;
+            }
+
+
+            if (target.defending) {
+
+                target.health -= 2;
+
+            }
+
+            else {
+
+                target.health -=
+                    ATTACK_DAMAGE;
+
+                target.vx =
+                    attacker.facing * 7;
+
+            }
+
+
+            target.hitCooldown = 12;
+
+
+            if (target.health < 0) {
+                target.health = 0;
+            }
+
+
+            updateHUD();
+
+
+            if (
+                target.health <= 0
+            ) {
+
+                finishGame(
+                    attacker
+                );
+
+            }
+
+        }
+
+
+        /* =================================================
+           플레이어 충돌
+        ================================================= */
+
+        function resolvePlayerCollision() {
+
+            const distance =
+                Math.abs(
+                    player1.x -
+                    player2.x
+                );
+
+            const minimumDistance = 48;
+
+
+            if (
+                distance <
+                minimumDistance
+            ) {
+
+                const push =
+                    (
+                        minimumDistance -
+                        distance
+                    ) / 2;
+
+
+                if (
+                    player1.x <
+                    player2.x
+                ) {
+
+                    player1.x -= push;
+                    player2.x += push;
+
+                }
+
+                else {
+
+                    player1.x += push;
+                    player2.x -= push;
+
+                }
+
+            }
+
+        }
+
+
+        /* =================================================
+           HUD
+        ================================================= */
+
+        function updateHUD() {
+
+            health1.style.width =
+                player1.health + "%";
+
+            health2.style.width =
+                player2.health + "%";
+
+        }
+
+
+        /* =================================================
+           게임 종료
+        ================================================= */
+
+        function finishGame(
+            winner
+        ) {
+
+            gameRunning = false;
+
+            winnerText.textContent =
+                winner.name +
+                " 승리!";
+
+            gameOver.classList.add(
+                "active"
+            );
+
+        }
+
+
+        /* =================================================
+           다시 캐릭터 선택
+        ================================================= */
+
+        restartButton.addEventListener(
+            "click",
+            () => {
+
+                gameRunning = false;
+
+                gameOver.classList.remove(
+                    "active"
+                );
+
+                gameScreen.classList.remove(
+                    "active"
+                );
+
+                selectScreen.classList.add(
+                    "active"
+                );
+
+
+                p1Selected = null;
+                p2Selected = null;
+
+
+                p1Description.textContent =
+                    "";
+
+                p2Description.textContent =
+                    "";
+
+
+                createCharacters(
+                    p1Characters,
+                    1
+                );
+
+                createCharacters(
+                    p2Characters,
+                    2
+                );
+
+
+                updateStartButton();
+
+            }
+        );
+
+
+        /* =================================================
+           배경
+        ================================================= */
+
+        function drawBackground() {
+
+            const sky =
+                ctx.createLinearGradient(
+                    0,
+                    0,
+                    0,
+                    canvas.height
+                );
+
+
+            sky.addColorStop(
+                0,
+                "#26364d"
+            );
+
+            sky.addColorStop(
+                0.65,
+                "#78905f"
+            );
+
+            sky.addColorStop(
+                1,
+                "#35452b"
+            );
+
+
+            ctx.fillStyle = sky;
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            const groundY =
+                canvas.height * 0.78;
+
+
+            ctx.fillStyle =
+                "#4c7538";
+
+
+            ctx.fillRect(
+                0,
+                groundY,
+                canvas.width,
+                canvas.height -
+                groundY
+            );
+
+
+            ctx.strokeStyle =
+                "rgba(255,255,255,.45)";
+
+            ctx.lineWidth = 3;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                0,
+                groundY
+            );
+
+            ctx.lineTo(
+                canvas.width,
+                groundY
+            );
+
+            ctx.stroke();
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                canvas.width / 2,
+                groundY
+            );
+
+            ctx.lineTo(
+                canvas.width / 2,
+                canvas.height
+            );
+
+            ctx.stroke();
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                canvas.width / 2,
+                groundY,
+                80,
+                Math.PI,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+
+        }
+
+
+        /* =================================================
+           캐릭터 렌더링
+        ================================================= */
+
+        function drawPlayer(player) {
+
+            const groundY =
+                canvas.height * 0.78;
+
+
+            const x =
+                player.x;
+
+
+            const y =
+                groundY -
+                player.height -
+                player.y;
+
+
+            ctx.save();
+
+
+            /* 그림자 */
+
+            ctx.fillStyle =
+                "rgba(0,0,0,.3)";
+
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                x,
+                groundY + 3,
+                32,
+                8,
+                0,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* 피격 */
+
+            if (
+                player.hitCooldown > 0 &&
+                Math.floor(
+                    player.hitCooldown / 2
+                ) % 2 === 0
+            ) {
+
+                ctx.globalAlpha = 0.45;
+
+            }
+
+
+            /* 돌진 효과 */
+
+            if (player.dashing) {
+
+                ctx.fillStyle =
+                    "rgba(255,255,255,.3)";
+
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    x -
+                    player.facing * 20,
+                    y + 45,
+                    42,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fill();
+
+            }
+
+
+            /* 몸 */
+
+            ctx.fillStyle =
+                player.color;
+
+
+            ctx.beginPath();
+
+            ctx.roundRect(
+                x -
+                player.width / 2,
+
+                y + 30,
+
+                player.width,
+
+                player.height - 30,
+
+                15
+            );
+
+            ctx.fill();
+
+
+            /* 머리 */
+
+            ctx.fillStyle =
+                "#d9a77c";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y + 20,
+                25,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* 눈 */
+
+            ctx.fillStyle =
+                "#111";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x +
+                player.facing * 8,
+
+                y + 15,
+
+                4,
+
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+
+            /* 방어 */
+
+            if (player.defending) {
+
+                ctx.strokeStyle =
+                    "#70c7ff";
+
+                ctx.lineWidth = 6;
+
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    x,
+                    y + 45,
+                    42,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.stroke();
+
+            }
+
+
+            /* 공격 */
+
+            if (player.attacking) {
+
+                ctx.strokeStyle =
+                    "#fff";
+
+                ctx.lineWidth = 9;
+
+                ctx.lineCap =
+                    "round";
+
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    x +
+                    player.facing * 20,
+
+                    y + 48
+                );
+
+                ctx.lineTo(
+                    x +
+                    player.facing * 65,
+
+                    y + 42
+                );
+
+                ctx.stroke();
+
+            }
+
+
+            /* 이름 */
+
+            ctx.fillStyle =
+                "white";
+
+            ctx.font =
+                "bold 15px Arial";
+
+            ctx.textAlign =
+                "center";
+
+
+            ctx.fillText(
+                player.name,
+                x,
+                y - 15
+            );
+
+
+            ctx.restore();
+
+        }
+
+
+        /* =================================================
+           게임 루프
+        ================================================= */
+
+        function gameLoop() {
+
+            if (gameRunning) {
+
+                handlePlayer1();
+
+                handlePlayer2();
+
+                updatePlayer(
+                    player1
+                );
+
+                updatePlayer(
+                    player2
+                );
+
+                resolvePlayerCollision();
+
+                attackCheck(
+                    player1,
+                    player2
+                );
+
+                attackCheck(
+                    player2,
+                    player1
+                );
+
+            }
+
+
+            drawBackground();
+
+
+            if (player1) {
+                drawPlayer(player1);
+            }
+
+
+            if (player2) {
+                drawPlayer(player2);
+            }
+
+
+            requestAnimationFrame(
+                gameLoop
+            );
+
+        }
+
+
+        /* =================================================
+           캔버스 크기
+        ================================================= */
+
+        function resizeCanvas() {
+
+            canvas.width =
+                window.innerWidth;
+
+            canvas.height =
+                window.innerHeight;
+
+        }
+
+
+        window.addEventListener(
+            "resize",
+            resizeCanvas
+        );
+
+
+        resizeCanvas();
+
+        gameLoop();
+
+    </script>
+
+</body>
+</html>
+
+
+
+
