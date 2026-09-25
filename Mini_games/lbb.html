@@ -1,9 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width,
+        initial-scale=1.0,
+        maximum-scale=1.0,
+        user-scalable=no">
 
     <title>레거시 바게루타이아 배틀</title>
 
@@ -11,23 +14,30 @@
         * {
             box-sizing: border-box;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        html,
         body {
+            width: 100%;
+            height: 100%;
             margin: 0;
+            padding: 0;
+            overflow: hidden;
             background: #111;
             color: white;
             font-family: Arial, sans-serif;
-            overflow: hidden;
         }
 
         button {
             font-family: inherit;
+            touch-action: manipulation;
         }
 
         .screen {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             display: none;
         }
 
@@ -35,77 +45,117 @@
             display: flex;
         }
 
-        /* =========================
-           캐릭터 선택 화면
-        ========================= */
+        /* =====================================
+           캐릭터 선택
+        ===================================== */
 
         #selectScreen {
             flex-direction: column;
             align-items: center;
-            padding: 25px;
+            justify-content: center;
+
+            padding:
+                clamp(10px, 3vw, 30px);
+
             background:
                 radial-gradient(
                     circle at center,
                     #3b2415,
-                    #111 70%
+                    #111 75%
                 );
+
+            overflow-y: auto;
         }
 
         .title {
-            font-size: clamp(30px, 6vw, 64px);
-            font-weight: 900;
-            letter-spacing: 3px;
-            margin: 10px 0 5px;
+            width: 100%;
+
             text-align: center;
+
+            font-size:
+                clamp(28px, 6vw, 60px);
+
+            font-weight: 900;
+
+            letter-spacing:
+                clamp(0px, 0.5vw, 4px);
+
+            margin-bottom: 4px;
         }
 
         .subtitle {
             color: #aaa;
-            margin-bottom: 25px;
+
+            font-size:
+                clamp(11px, 2vw, 16px);
+
+            margin-bottom:
+                clamp(12px, 3vw, 25px);
         }
 
         .selectArea {
-            width: min(1100px, 95vw);
+            width: min(1100px, 96%);
+
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            flex: 1;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap:
+                clamp(10px, 2vw, 20px);
+
             min-height: 0;
         }
 
         .playerSelect {
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #444;
-            border-radius: 18px;
-            padding: 15px;
-            min-width: 0;
+            background:
+                rgba(0, 0, 0, 0.55);
+
+            border:
+                2px solid #444;
+
+            border-radius:
+                clamp(12px, 2vw, 18px);
+
+            padding:
+                clamp(8px, 2vw, 15px);
         }
 
         .playerTitle {
-            font-size: 22px;
+            font-size:
+                clamp(16px, 3vw, 22px);
+
             font-weight: bold;
-            margin-bottom: 12px;
+
+            margin-bottom: 10px;
         }
 
         .characterGrid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap:
+                clamp(5px, 1.2vw, 10px);
         }
 
         .character {
-            background: #222;
-            border: 2px solid #444;
-            border-radius: 12px;
-            padding: 10px;
-            color: white;
-            cursor: pointer;
-            transition: 0.15s;
-        }
+            min-width: 0;
 
-        .character:hover {
-            background: #333;
-            transform: translateY(-2px);
+            padding:
+                clamp(6px, 1.5vw, 10px);
+
+            border:
+                2px solid #444;
+
+            border-radius: 12px;
+
+            background: #222;
+
+            color: white;
+
+            cursor: pointer;
         }
 
         .character.selected {
@@ -114,103 +164,170 @@
         }
 
         .characterIcon {
-            width: 70px;
-            height: 70px;
+            width:
+                clamp(45px, 8vw, 75px);
+
+            height:
+                clamp(55px, 10vw, 90px);
+
             margin: auto;
 
-            border-radius: 18px;
+            border-radius: 50%;
 
             display: flex;
-            justify-content: center;
-            align-items: center;
 
-            font-size: 38px;
-            background: #555;
+            align-items: center;
+            justify-content: center;
+
+            font-size:
+                clamp(20px, 4vw, 38px);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e8b27c,
+                    #9a5730
+                );
+
+            border:
+                3px solid rgba(255,255,255,.35);
+
+            box-shadow:
+                inset 8px 8px 12px
+                rgba(255,255,255,.15),
+
+                inset -8px -8px 12px
+                rgba(0,0,0,.25);
         }
 
         .characterName {
-            margin-top: 7px;
+            margin-top: 6px;
+
             font-weight: bold;
-            font-size: 14px;
+
+            font-size:
+                clamp(10px, 2vw, 14px);
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .description {
-            height: 70px;
+            height:
+                clamp(45px, 8vw, 70px);
 
-            margin-top: 12px;
+            margin-top: 10px;
+
             padding: 10px;
 
             border-radius: 10px;
 
             background: #181818;
+
             color: #888;
 
-            text-align: left;
-            font-size: 13px;
+            font-size:
+                clamp(10px, 1.8vw, 13px);
         }
 
         .startButton {
-            margin-top: 18px;
-            padding: 15px 45px;
+            margin-top:
+                clamp(10px, 2vw, 18px);
+
+            padding:
+                clamp(10px, 2vw, 15px)
+                clamp(28px, 6vw, 45px);
 
             border: none;
+
             border-radius: 12px;
 
             background: #f4b942;
+
             color: #111;
 
-            font-size: 20px;
-            font-weight: 900;
+            font-size:
+                clamp(15px, 3vw, 20px);
 
-            cursor: pointer;
+            font-weight: 900;
         }
 
         .startButton:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
+            opacity: .35;
         }
 
-        /* =========================
+
+        /* =====================================
            게임 화면
-        ========================= */
+        ===================================== */
 
         #gameScreen {
             position: relative;
-            background: #222;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
         }
 
         canvas {
+            position: absolute;
+
+            inset: 0;
+
             width: 100%;
             height: 100%;
+
             display: block;
         }
 
+
+        /* =====================================
+           체력 HUD
+        ===================================== */
+
         .hud {
             position: absolute;
-            top: 15px;
+
+            top:
+                max(10px, env(safe-area-inset-top));
+
             left: 50%;
 
-            transform: translateX(-50%);
+            transform:
+                translateX(-50%);
 
-            width: min(900px, 90vw);
+            width:
+                min(900px, 92%);
 
             pointer-events: none;
         }
 
         .healthRow {
             display: grid;
-            grid-template-columns: 1fr 100px 1fr;
 
-            gap: 12px;
+            grid-template-columns:
+                minmax(0, 1fr)
+                auto
+                minmax(0, 1fr);
+
+            gap:
+                clamp(5px, 2vw, 12px);
+
             align-items: center;
         }
 
         .healthBox {
-            height: 28px;
+            height:
+                clamp(18px, 4vw, 28px);
 
             background: #111;
 
-            border: 3px solid white;
+            border:
+                clamp(2px, .5vw, 3px)
+                solid white;
+
             border-radius: 7px;
 
             overflow: hidden;
@@ -220,41 +337,113 @@
             width: 100%;
             height: 100%;
 
-            background: #d83b3b;
+            background:
+                linear-gradient(
+                    90deg,
+                    #a91919,
+                    #ed4b4b
+                );
 
-            transition: width 0.12s;
+            transition:
+                width .12s;
         }
 
-        #health2 {
-            float: right;
+        .health2 {
+            margin-left: auto;
         }
 
         .roundText {
-            text-align: center;
+            font-size:
+                clamp(14px, 3vw, 22px);
 
-            font-size: 20px;
-            font-weight: bold;
+            font-weight: 900;
         }
 
-        .controlsText {
+
+        /* =====================================
+           모바일 조작
+        ===================================== */
+
+        .mobileControls {
             position: absolute;
 
-            bottom: 12px;
-            left: 50%;
+            left: 0;
+            right: 0;
 
-            transform: translateX(-50%);
+            bottom:
+                max(10px, env(safe-area-inset-bottom));
 
-            padding: 8px 15px;
+            display: flex;
 
-            background: rgba(0, 0, 0, 0.65);
+            justify-content:
+                space-between;
 
-            border-radius: 10px;
+            align-items: flex-end;
 
-            font-size: 13px;
-            color: #ddd;
+            padding:
+                10px;
 
             pointer-events: none;
         }
+
+        .controlGroup {
+            display: flex;
+
+            gap:
+                clamp(5px, 1.5vw, 10px);
+
+            pointer-events: auto;
+        }
+
+        .controlButton {
+            width:
+                clamp(48px, 13vw, 70px);
+
+            height:
+                clamp(48px, 13vw, 70px);
+
+            border:
+                2px solid
+                rgba(255,255,255,.45);
+
+            border-radius: 50%;
+
+            background:
+                rgba(0,0,0,.6);
+
+            color: white;
+
+            font-size:
+                clamp(14px, 3.5vw, 20px);
+
+            font-weight: bold;
+        }
+
+        .controlButton:active {
+            background: #f4b942;
+            color: #111;
+            transform: scale(.92);
+        }
+
+        .attackButton {
+            background:
+                rgba(170, 35, 35, .8);
+        }
+
+        .defenseButton {
+            background:
+                rgba(40, 100, 170, .8);
+        }
+
+        .dashButton {
+            background:
+                rgba(170, 110, 25, .8);
+        }
+
+
+        /* =====================================
+           게임 종료
+        ===================================== */
 
         #gameOver {
             position: absolute;
@@ -268,7 +457,10 @@
 
             flex-direction: column;
 
-            background: rgba(0, 0, 0, 0.7);
+            background:
+                rgba(0,0,0,.72);
+
+            z-index: 30;
         }
 
         #gameOver.active {
@@ -276,59 +468,114 @@
         }
 
         .winner {
-            font-size: clamp(35px, 8vw, 70px);
+            font-size:
+                clamp(35px, 9vw, 70px);
 
             font-weight: 900;
+
+            text-align: center;
         }
 
         .restartButton {
             margin-top: 20px;
 
-            padding: 14px 35px;
+            padding:
+                12px 28px;
 
             border: none;
+
             border-radius: 10px;
 
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 17px;
 
-            cursor: pointer;
+            font-weight: bold;
         }
 
-        /* =========================
-           모바일
-        ========================= */
+
+        /* =====================================
+           세로 모바일
+        ===================================== */
 
         @media (max-width: 700px) {
+
+            #selectScreen {
+                justify-content: flex-start;
+                padding-top: 15px;
+            }
+
             .selectArea {
                 grid-template-columns: 1fr;
+
+                width: 96%;
+
                 overflow-y: auto;
             }
 
-            .characterGrid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .characterIcon {
-                width: 50px;
-                height: 50px;
-                font-size: 28px;
+            .playerSelect {
+                padding: 9px;
             }
 
             .description {
                 display: none;
             }
         }
+
+
+        /* =====================================
+           매우 작은 화면
+        ===================================== */
+
+        @media (max-width: 380px) {
+
+            .characterGrid {
+                gap: 4px;
+            }
+
+            .character {
+                padding: 5px;
+            }
+
+            .characterIcon {
+                width: 42px;
+                height: 52px;
+            }
+
+            .characterName {
+                font-size: 9px;
+            }
+        }
+
+
+        /* =====================================
+           가로 모바일
+        ===================================== */
+
+        @media (
+            orientation: landscape
+        ) and (max-height: 550px) {
+
+            .mobileControls {
+                padding-bottom: 5px;
+            }
+
+            .controlButton {
+                width: 50px;
+                height: 50px;
+            }
+        }
     </style>
 </head>
 
+
 <body>
 
-    <!-- =========================
+    <!-- =====================================
          캐릭터 선택
-    ========================= -->
+    ===================================== -->
 
-    <div id="selectScreen" class="screen active">
+    <div
+        id="selectScreen"
+        class="screen active">
 
         <div class="title">
             레거시 바게루타이아 배틀
@@ -337,6 +584,7 @@
         <div class="subtitle">
             LEGACY BAGERUTAIA BATTLE
         </div>
+
 
         <div class="selectArea">
 
@@ -360,6 +608,7 @@
 
             </div>
 
+
             <!-- PLAYER 2 -->
 
             <div class="playerSelect">
@@ -382,6 +631,7 @@
 
         </div>
 
+
         <button
             class="startButton"
             id="startButton"
@@ -394,25 +644,30 @@
     </div>
 
 
-    <!-- =========================
-         게임 화면
-    ========================= -->
+    <!-- =====================================
+         게임
+    ===================================== -->
 
-    <div id="gameScreen" class="screen">
+    <div
+        id="gameScreen"
+        class="screen">
 
-        <canvas id="gameCanvas"></canvas>
+        <canvas
+            id="gameCanvas">
+        </canvas>
+
+
+        <!-- 체력 -->
 
         <div class="hud">
 
             <div class="healthRow">
 
                 <div class="healthBox">
-
                     <div
                         class="health"
                         id="health1">
                     </div>
-
                 </div>
 
                 <div class="roundText">
@@ -420,12 +675,10 @@
                 </div>
 
                 <div class="healthBox">
-
                     <div
-                        class="health"
+                        class="health health2"
                         id="health2">
                     </div>
-
                 </div>
 
             </div>
@@ -433,35 +686,72 @@
         </div>
 
 
-        <div class="controlsText">
+        <!-- 모바일 조작 -->
 
-            P1:
-            A/D 이동
-            · W 점프
-            · F 공격
-            · G 방어
-            · H 돌진
+        <div
+            class="mobileControls">
 
-            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <!-- PLAYER 1 -->
 
-            P2:
-            ←/→ 이동
-            · ↑ 점프
-            · K 공격
-            · L 방어
-            · ; 돌진
+            <div class="controlGroup">
+
+                <button
+                    class="controlButton"
+                    data-key="a">
+
+                    ◀
+
+                </button>
+
+                <button
+                    class="controlButton"
+                    data-key="d">
+
+                    ▶
+
+                </button>
+
+            </div>
+
+
+            <div class="controlGroup">
+
+                <button
+                    class="controlButton"
+                    data-key="g">
+
+                    방어
+
+                </button>
+
+                <button
+                    class="controlButton attackButton"
+                    data-action="attack1">
+
+                    공격
+
+                </button>
+
+                <button
+                    class="controlButton dashButton"
+                    data-action="dash1">
+
+                    돌진
+
+                </button>
+
+            </div>
 
         </div>
 
+
+        <!-- 게임 종료 -->
 
         <div id="gameOver">
 
             <div
                 class="winner"
                 id="winnerText">
-
-                PLAYER 1 WIN
-
             </div>
 
             <button
@@ -479,84 +769,116 @@
 
     <script>
 
-        /* =================================================
-           캐릭터
-        ================================================= */
+        /* =====================================
+           캐릭터 데이터
+        ===================================== */
 
         const characters = [
+
             {
                 name: "커피빵",
-                icon: "☕"
+                color: "#8b5638"
             },
+
             {
                 name: "빈대떡",
-                icon: "🥞"
+                color: "#4d8a45"
             },
+
             {
                 name: "시루떡",
-                icon: "⬜"
+                color: "#eeeeee"
             },
+
             {
                 name: "번트브레드",
-                icon: "🍞"
+                color: "#4a2415"
             },
+
             {
                 name: "바로게르트",
-                icon: "🟫"
+                color: "#d49b55"
             }
+
         ];
 
 
-        /* =================================================
+        /* =====================================
            DOM
-        ================================================= */
+        ===================================== */
 
         const selectScreen =
-            document.getElementById("selectScreen");
+            document.getElementById(
+                "selectScreen"
+            );
 
         const gameScreen =
-            document.getElementById("gameScreen");
+            document.getElementById(
+                "gameScreen"
+            );
 
         const p1Characters =
-            document.getElementById("p1Characters");
+            document.getElementById(
+                "p1Characters"
+            );
 
         const p2Characters =
-            document.getElementById("p2Characters");
+            document.getElementById(
+                "p2Characters"
+            );
 
         const p1Description =
-            document.getElementById("p1Description");
+            document.getElementById(
+                "p1Description"
+            );
 
         const p2Description =
-            document.getElementById("p2Description");
+            document.getElementById(
+                "p2Description"
+            );
 
         const startButton =
-            document.getElementById("startButton");
+            document.getElementById(
+                "startButton"
+            );
 
         const health1 =
-            document.getElementById("health1");
+            document.getElementById(
+                "health1"
+            );
 
         const health2 =
-            document.getElementById("health2");
+            document.getElementById(
+                "health2"
+            );
 
         const gameOver =
-            document.getElementById("gameOver");
+            document.getElementById(
+                "gameOver"
+            );
 
         const winnerText =
-            document.getElementById("winnerText");
+            document.getElementById(
+                "winnerText"
+            );
 
         const restartButton =
-            document.getElementById("restartButton");
+            document.getElementById(
+                "restartButton"
+            );
 
         const canvas =
-            document.getElementById("gameCanvas");
+            document.getElementById(
+                "gameCanvas"
+            );
 
         const ctx =
             canvas.getContext("2d");
 
 
-        /* =================================================
-           캐릭터 선택 상태
-        ================================================= */
+        /* =====================================
+           선택 상태
+        ===================================== */
 
         let p1Selected = null;
         let p2Selected = null;
@@ -573,20 +895,40 @@
                 (character, index) => {
 
                     const button =
-                        document.createElement("button");
+                        document.createElement(
+                            "button"
+                        );
 
                     button.className =
                         "character";
 
+
                     button.innerHTML = `
-                        <div class="characterIcon">
-                            ${character.icon}
+
+                        <div
+                            class="characterIcon"
+                            style="
+                                background:
+                                linear-gradient(
+                                    135deg,
+                                    ${character.color},
+                                    #222
+                                );
+                            ">
+
+                            ●
+
                         </div>
 
-                        <div class="characterName">
+                        <div
+                            class="characterName">
+
                             ${character.name}
+
                         </div>
+
                     `;
+
 
                     button.addEventListener(
                         "click",
@@ -594,7 +936,8 @@
 
                             if (player === 1) {
 
-                                p1Selected = index;
+                                p1Selected =
+                                    index;
 
                                 [
                                     ...container.children
@@ -611,11 +954,12 @@
 
                                 p1Description.textContent =
                                     "";
-                            }
 
+                            }
                             else {
 
-                                p2Selected = index;
+                                p2Selected =
+                                    index;
 
                                 [
                                     ...container.children
@@ -632,6 +976,7 @@
 
                                 p2Description.textContent =
                                     "";
+
                             }
 
                             updateStartButton();
@@ -639,7 +984,10 @@
                         }
                     );
 
-                    container.appendChild(button);
+
+                    container.appendChild(
+                        button
+                    );
 
                 }
             );
@@ -666,36 +1014,36 @@
         );
 
 
-        /* =================================================
+        /* =====================================
            게임 변수
-        ================================================= */
+        ===================================== */
 
         let player1;
         let player2;
 
-        let keys = {};
+        const keys = {};
 
         let gameRunning = false;
 
+
         const GRAVITY = 0.75;
-
-        const ATTACK_DAMAGE = 10;
-
-        const ATTACK_RANGE = 75;
 
         const MOVE_SPEED = 4;
 
         const DASH_SPEED = 11;
 
+        const ATTACK_DAMAGE = 10;
 
-        /* =================================================
+        const ATTACK_RANGE = 75;
+
+
+        /* =====================================
            플레이어 생성
-        ================================================= */
+        ===================================== */
 
         function createPlayer(
             x,
-            color,
-            name,
+            data,
             facing
         ) {
 
@@ -707,22 +1055,25 @@
                 vx: 0,
                 vy: 0,
 
-                width: 55,
-                height: 90,
+                width: 58,
+                height: 100,
 
                 health: 100,
 
-                color: color,
-                name: name,
+                color: data.color,
+
+                name: data.name,
 
                 facing: facing,
 
                 attacking: false,
+
                 attackTimer: 0,
 
                 defending: false,
 
                 dashing: false,
+
                 dashTimer: 0,
 
                 hitCooldown: 0,
@@ -730,15 +1081,17 @@
                 onGround: true,
 
                 attackPressed: false,
+
                 dashPressed: false
 
             };
+
         }
 
 
-        /* =================================================
+        /* =====================================
            게임 시작
-        ================================================= */
+        ===================================== */
 
         startButton.addEventListener(
             "click",
@@ -756,36 +1109,42 @@
                 "active"
             );
 
+
             resizeCanvas();
 
-            player1 = createPlayer(
-                canvas.width * 0.3,
-                "#d39a63",
-                characters[p1Selected].name,
-                1
-            );
 
-            player2 = createPlayer(
-                canvas.width * 0.7,
-                "#8fa4c9",
-                characters[p2Selected].name,
-                -1
-            );
+            player1 =
+                createPlayer(
+                    canvas.width * 0.3,
+                    characters[p1Selected],
+                    1
+                );
+
+
+            player2 =
+                createPlayer(
+                    canvas.width * 0.7,
+                    characters[p2Selected],
+                    -1
+                );
+
 
             gameRunning = true;
+
 
             gameOver.classList.remove(
                 "active"
             );
+
 
             updateHUD();
 
         }
 
 
-        /* =================================================
+        /* =====================================
            키보드
-        ================================================= */
+        ===================================== */
 
         window.addEventListener(
             "keydown",
@@ -811,9 +1170,9 @@
         );
 
 
-        /* =================================================
+        /* =====================================
            공격
-        ================================================= */
+        ===================================== */
 
         function attack(player) {
 
@@ -836,9 +1195,9 @@
         }
 
 
-        /* =================================================
+        /* =====================================
            방어
-        ================================================= */
+        ===================================== */
 
         function setDefense(
             player,
@@ -851,16 +1210,12 @@
 
             player.defending = value;
 
-            if (value) {
-                player.vx *= 0.3;
-            }
-
         }
 
 
-        /* =================================================
+        /* =====================================
            돌진
-        ================================================= */
+        ===================================== */
 
         function dash(player) {
 
@@ -881,14 +1236,15 @@
             player.dashTimer = 10;
 
             player.vx =
-                player.facing * DASH_SPEED;
+                player.facing *
+                DASH_SPEED;
 
         }
 
 
-        /* =================================================
-           PLAYER 1 입력
-        ================================================= */
+        /* =====================================
+           PLAYER 1
+        ===================================== */
 
         function handlePlayer1() {
 
@@ -900,7 +1256,6 @@
                 player1.facing = -1;
 
             }
-
             else if (keys["d"]) {
 
                 player1.vx =
@@ -909,10 +1264,9 @@
                 player1.facing = 1;
 
             }
-
             else if (!player1.dashing) {
 
-                player1.vx *= 0.75;
+                player1.vx *= .75;
 
             }
 
@@ -931,16 +1285,22 @@
 
             if (keys["f"]) {
 
-                if (!player1.attackPressed) {
+                if (
+                    !player1.attackPressed
+                ) {
+
                     attack(player1);
+
                 }
 
-                player1.attackPressed = true;
+                player1.attackPressed =
+                    true;
 
             }
             else {
 
-                player1.attackPressed = false;
+                player1.attackPressed =
+                    false;
 
             }
 
@@ -953,25 +1313,31 @@
 
             if (keys["h"]) {
 
-                if (!player1.dashPressed) {
+                if (
+                    !player1.dashPressed
+                ) {
+
                     dash(player1);
+
                 }
 
-                player1.dashPressed = true;
+                player1.dashPressed =
+                    true;
 
             }
             else {
 
-                player1.dashPressed = false;
+                player1.dashPressed =
+                    false;
 
             }
 
         }
 
 
-        /* =================================================
-           PLAYER 2 입력
-        ================================================= */
+        /* =====================================
+           PLAYER 2
+        ===================================== */
 
         function handlePlayer2() {
 
@@ -983,7 +1349,6 @@
                 player2.facing = -1;
 
             }
-
             else if (keys["arrowright"]) {
 
                 player2.vx =
@@ -992,10 +1357,9 @@
                 player2.facing = 1;
 
             }
-
             else if (!player2.dashing) {
 
-                player2.vx *= 0.75;
+                player2.vx *= .75;
 
             }
 
@@ -1014,16 +1378,22 @@
 
             if (keys["k"]) {
 
-                if (!player2.attackPressed) {
+                if (
+                    !player2.attackPressed
+                ) {
+
                     attack(player2);
+
                 }
 
-                player2.attackPressed = true;
+                player2.attackPressed =
+                    true;
 
             }
             else {
 
-                player2.attackPressed = false;
+                player2.attackPressed =
+                    false;
 
             }
 
@@ -1036,25 +1406,31 @@
 
             if (keys[";"]) {
 
-                if (!player2.dashPressed) {
+                if (
+                    !player2.dashPressed
+                ) {
+
                     dash(player2);
+
                 }
 
-                player2.dashPressed = true;
+                player2.dashPressed =
+                    true;
 
             }
             else {
 
-                player2.dashPressed = false;
+                player2.dashPressed =
+                    false;
 
             }
 
         }
 
 
-        /* =================================================
+        /* =====================================
            플레이어 업데이트
-        ================================================= */
+        ===================================== */
 
         function updatePlayer(player) {
 
@@ -1100,7 +1476,8 @@
                     player.attackTimer <= 0
                 ) {
 
-                    player.attacking = false;
+                    player.attacking =
+                        false;
 
                 }
 
@@ -1115,7 +1492,8 @@
                     player.dashTimer <= 0
                 ) {
 
-                    player.dashing = false;
+                    player.dashing =
+                        false;
 
                 }
 
@@ -1131,9 +1509,9 @@
         }
 
 
-        /* =================================================
+        /* =====================================
            공격 판정
-        ================================================= */
+        ===================================== */
 
         function attackCheck(
             attacker,
@@ -1162,7 +1540,9 @@
                 distance >
                 ATTACK_RANGE
             ) {
+
                 return;
+
             }
 
 
@@ -1171,24 +1551,27 @@
                 target.health -= 2;
 
             }
-
             else {
 
                 target.health -=
                     ATTACK_DAMAGE;
 
                 target.vx =
-                    attacker.facing * 7;
+                    attacker.facing *
+                    7;
 
             }
 
 
-            target.hitCooldown = 12;
+            target.hitCooldown =
+                12;
 
 
-            if (target.health < 0) {
-                target.health = 0;
-            }
+            target.health =
+                Math.max(
+                    0,
+                    target.health
+                );
 
 
             updateHUD();
@@ -1207,9 +1590,9 @@
         }
 
 
-        /* =================================================
-           플레이어 충돌
-        ================================================= */
+        /* =====================================
+           캐릭터 충돌
+        ===================================== */
 
         function resolvePlayerCollision() {
 
@@ -1219,7 +1602,8 @@
                     player2.x
                 );
 
-            const minimumDistance = 48;
+            const minimumDistance =
+                52;
 
 
             if (
@@ -1243,7 +1627,6 @@
                     player2.x += push;
 
                 }
-
                 else {
 
                     player1.x += push;
@@ -1256,9 +1639,9 @@
         }
 
 
-        /* =================================================
+        /* =====================================
            HUD
-        ================================================= */
+        ===================================== */
 
         function updateHUD() {
 
@@ -1271,9 +1654,9 @@
         }
 
 
-        /* =================================================
+        /* =====================================
            게임 종료
-        ================================================= */
+        ===================================== */
 
         function finishGame(
             winner
@@ -1292,9 +1675,123 @@
         }
 
 
-        /* =================================================
+        /* =====================================
+           모바일 버튼
+        ===================================== */
+
+        document
+            .querySelectorAll(
+                ".controlButton[data-key]"
+            )
+            .forEach(
+                button => {
+
+                    const key =
+                        button.dataset.key;
+
+
+                    button.addEventListener(
+                        "pointerdown",
+                        event => {
+
+                            event.preventDefault();
+
+                            keys[key] =
+                                true;
+
+                        }
+                    );
+
+
+                    button.addEventListener(
+                        "pointerup",
+                        event => {
+
+                            event.preventDefault();
+
+                            keys[key] =
+                                false;
+
+                        }
+                    );
+
+
+                    button.addEventListener(
+                        "pointercancel",
+                        () => {
+
+                            keys[key] =
+                                false;
+
+                        }
+                    );
+
+
+                    button.addEventListener(
+                        "pointerleave",
+                        () => {
+
+                            keys[key] =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".controlButton[data-action]"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "pointerdown",
+                        event => {
+
+                            event.preventDefault();
+
+
+                            const action =
+                                button.dataset.action;
+
+
+                            if (
+                                action ===
+                                "attack1"
+                            ) {
+
+                                attack(
+                                    player1
+                                );
+
+                            }
+
+
+                            if (
+                                action ===
+                                "dash1"
+                            ) {
+
+                                dash(
+                                    player1
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /* =====================================
            다시 캐릭터 선택
-        ================================================= */
+        ===================================== */
 
         restartButton.addEventListener(
             "click",
@@ -1343,18 +1840,25 @@
         );
 
 
-        /* =================================================
+        /* =====================================
            배경
-        ================================================= */
+        ===================================== */
 
         function drawBackground() {
+
+            const width =
+                canvas.width;
+
+            const height =
+                canvas.height;
+
 
             const sky =
                 ctx.createLinearGradient(
                     0,
                     0,
                     0,
-                    canvas.height
+                    height
                 );
 
 
@@ -1364,7 +1868,7 @@
             );
 
             sky.addColorStop(
-                0.65,
+                .65,
                 "#78905f"
             );
 
@@ -1376,16 +1880,17 @@
 
             ctx.fillStyle = sky;
 
+
             ctx.fillRect(
                 0,
                 0,
-                canvas.width,
-                canvas.height
+                width,
+                height
             );
 
 
             const groundY =
-                canvas.height * 0.78;
+                height * .78;
 
 
             ctx.fillStyle =
@@ -1395,9 +1900,8 @@
             ctx.fillRect(
                 0,
                 groundY,
-                canvas.width,
-                canvas.height -
-                groundY
+                width,
+                height - groundY
             );
 
 
@@ -1415,36 +1919,25 @@
             );
 
             ctx.lineTo(
-                canvas.width,
+                width,
                 groundY
             );
 
             ctx.stroke();
 
+
+            /* 중앙선 */
 
             ctx.beginPath();
 
             ctx.moveTo(
-                canvas.width / 2,
+                width / 2,
                 groundY
             );
 
             ctx.lineTo(
-                canvas.width / 2,
-                canvas.height
-            );
-
-            ctx.stroke();
-
-
-            ctx.beginPath();
-
-            ctx.arc(
-                canvas.width / 2,
-                groundY,
-                80,
-                Math.PI,
-                Math.PI * 2
+                width / 2,
+                height
             );
 
             ctx.stroke();
@@ -1452,14 +1945,14 @@
         }
 
 
-        /* =================================================
-           캐릭터 렌더링
-        ================================================= */
+        /* =====================================
+           캡슐형 캐릭터
+        ===================================== */
 
         function drawPlayer(player) {
 
             const groundY =
-                canvas.height * 0.78;
+                canvas.height * .78;
 
 
             const x =
@@ -1478,7 +1971,7 @@
             /* 그림자 */
 
             ctx.fillStyle =
-                "rgba(0,0,0,.3)";
+                "rgba(0,0,0,.35)";
 
 
             ctx.beginPath();
@@ -1486,8 +1979,8 @@
             ctx.ellipse(
                 x,
                 groundY + 3,
-                32,
-                8,
+                35,
+                9,
                 0,
                 0,
                 Math.PI * 2
@@ -1505,7 +1998,8 @@
                 ) % 2 === 0
             ) {
 
-                ctx.globalAlpha = 0.45;
+                ctx.globalAlpha =
+                    .45;
 
             }
 
@@ -1515,16 +2009,20 @@
             if (player.dashing) {
 
                 ctx.fillStyle =
-                    "rgba(255,255,255,.3)";
+                    "rgba(255,255,255,.25)";
 
 
                 ctx.beginPath();
 
                 ctx.arc(
                     x -
-                    player.facing * 20,
-                    y + 45,
-                    42,
+                    player.facing * 22,
+
+                    y +
+                    player.height / 2,
+
+                    48,
+
                     0,
                     Math.PI * 2
                 );
@@ -1534,10 +2032,42 @@
             }
 
 
-            /* 몸 */
+            /* =========================
+               캡슐 몸체
+            ========================= */
+
+            const bodyGradient =
+                ctx.createLinearGradient(
+                    x - 35,
+                    y,
+                    x + 35,
+                    y + player.height
+                );
+
+
+            bodyGradient.addColorStop(
+                0,
+                "#ffffff"
+            );
+
+            bodyGradient.addColorStop(
+                .18,
+                player.color
+            );
+
+            bodyGradient.addColorStop(
+                .55,
+                player.color
+            );
+
+            bodyGradient.addColorStop(
+                1,
+                "#2b1710"
+            );
+
 
             ctx.fillStyle =
-                player.color;
+                bodyGradient;
 
 
             ctx.beginPath();
@@ -1546,35 +2076,40 @@
                 x -
                 player.width / 2,
 
-                y + 30,
+                y,
 
                 player.width,
 
-                player.height - 30,
+                player.height,
 
-                15
+                player.width / 2
             );
 
             ctx.fill();
 
 
-            /* 머리 */
+            /* 몸체 외곽선 */
 
-            ctx.fillStyle =
-                "#d9a77c";
+            ctx.strokeStyle =
+                "rgba(0,0,0,.5)";
+
+            ctx.lineWidth = 4;
+
+            ctx.stroke();
 
 
-            ctx.beginPath();
+            /* =========================
+               얼굴
+            ========================= */
 
-            ctx.arc(
-                x,
-                y + 20,
-                25,
-                0,
-                Math.PI * 2
-            );
+            const faceX =
+                x +
+                player.facing * 2;
 
-            ctx.fill();
+
+            const faceY =
+                y +
+                player.height * .38;
 
 
             /* 눈 */
@@ -1585,14 +2120,17 @@
 
             ctx.beginPath();
 
-            ctx.arc(
-                x +
+            ctx.ellipse(
+                faceX +
                 player.facing * 8,
 
-                y + 15,
+                faceY,
 
                 4,
 
+                6,
+
+                0,
                 0,
                 Math.PI * 2
             );
@@ -1600,37 +2138,64 @@
             ctx.fill();
 
 
-            /* 방어 */
+            /* 눈썹 */
 
-            if (player.defending) {
+            ctx.strokeStyle =
+                "#111";
 
-                ctx.strokeStyle =
-                    "#70c7ff";
+            ctx.lineWidth = 3;
 
-                ctx.lineWidth = 6;
-
-
-                ctx.beginPath();
-
-                ctx.arc(
-                    x,
-                    y + 45,
-                    42,
-                    0,
-                    Math.PI * 2
-                );
-
-                ctx.stroke();
-
-            }
+            ctx.lineCap =
+                "round";
 
 
-            /* 공격 */
+            ctx.beginPath();
+
+            ctx.moveTo(
+                faceX +
+                player.facing * 3,
+
+                faceY - 10
+            );
+
+            ctx.lineTo(
+                faceX +
+                player.facing * 13,
+
+                faceY - 12
+            );
+
+            ctx.stroke();
+
+
+            /* 입 */
+
+            ctx.beginPath();
+
+            ctx.arc(
+                faceX +
+                player.facing * 6,
+
+                faceY + 14,
+
+                7,
+
+                0,
+
+                Math.PI
+            );
+
+            ctx.stroke();
+
+
+            /* =========================
+               공격 효과
+            ========================= */
 
             if (player.attacking) {
 
                 ctx.strokeStyle =
-                    "#fff";
+                    "#ffffff";
 
                 ctx.lineWidth = 9;
 
@@ -1642,16 +2207,50 @@
 
                 ctx.moveTo(
                     x +
-                    player.facing * 20,
+                    player.facing * 22,
 
-                    y + 48
+                    y +
+                    player.height * .5
                 );
 
                 ctx.lineTo(
                     x +
                     player.facing * 65,
 
-                    y + 42
+                    y +
+                    player.height * .45
+                );
+
+                ctx.stroke();
+
+            }
+
+
+            /* =========================
+               방어 효과
+            ========================= */
+
+            if (player.defending) {
+
+                ctx.strokeStyle =
+                    "#69c7ff";
+
+                ctx.lineWidth = 6;
+
+
+                ctx.beginPath();
+
+                ctx.ellipse(
+                    x,
+                    y +
+                    player.height / 2,
+
+                    48,
+                    65,
+
+                    0,
+                    0,
+                    Math.PI * 2
                 );
 
                 ctx.stroke();
@@ -1674,7 +2273,7 @@
             ctx.fillText(
                 player.name,
                 x,
-                y - 15
+                y - 12
             );
 
 
@@ -1683,9 +2282,9 @@
         }
 
 
-        /* =================================================
+        /* =====================================
            게임 루프
-        ================================================= */
+        ===================================== */
 
         function gameLoop() {
 
@@ -1695,6 +2294,7 @@
 
                 handlePlayer2();
 
+
                 updatePlayer(
                     player1
                 );
@@ -1703,7 +2303,9 @@
                     player2
                 );
 
+
                 resolvePlayerCollision();
+
 
                 attackCheck(
                     player1,
@@ -1722,12 +2324,20 @@
 
 
             if (player1) {
-                drawPlayer(player1);
+
+                drawPlayer(
+                    player1
+                );
+
             }
 
 
             if (player2) {
-                drawPlayer(player2);
+
+                drawPlayer(
+                    player2
+                );
+
             }
 
 
@@ -1738,17 +2348,44 @@
         }
 
 
-        /* =================================================
-           캔버스 크기
-        ================================================= */
+        /* =====================================
+           화면 크기 자동 대응
+        ===================================== */
 
         function resizeCanvas() {
 
+            const rect =
+                canvas.getBoundingClientRect();
+
+
             canvas.width =
-                window.innerWidth;
+                Math.max(
+                    1,
+                    Math.floor(
+                        rect.width *
+                        window.devicePixelRatio
+                    )
+                );
+
 
             canvas.height =
-                window.innerHeight;
+                Math.max(
+                    1,
+                    Math.floor(
+                        rect.height *
+                        window.devicePixelRatio
+                    )
+                );
+
+
+            ctx.setTransform(
+                window.devicePixelRatio,
+                0,
+                0,
+                window.devicePixelRatio,
+                0,
+                0
+            );
 
         }
 
@@ -1759,6 +2396,19 @@
         );
 
 
+        window.addEventListener(
+            "orientationchange",
+            () => {
+
+                setTimeout(
+                    resizeCanvas,
+                    100
+                );
+
+            }
+        );
+
+
         resizeCanvas();
 
         gameLoop();
@@ -1766,8 +2416,4 @@
     </script>
 
 </body>
-</html>
-
-
-
-
+    </html>
