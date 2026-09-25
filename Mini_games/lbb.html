@@ -1,155 +1,190 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
 <title>Legacy Low Bar</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-    }
 
-    html,
-    body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: #111;
-        color: white;
-        font-family: Arial, sans-serif;
-        touch-action: manipulation;
-    }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 
-    #game {
-        width: 100%;
-        height: 100%;
-        max-width: 900px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
+    background: #111;
+    color: white;
 
-    h1 {
-        margin: 0 0 10px;
-        font-size: clamp(32px, 8vw, 64px);
-        text-align: center;
-    }
+    font-family: Arial, sans-serif;
 
-    #subtitle {
-        color: #aaa;
-        margin-bottom: 25px;
-        font-size: clamp(14px, 3vw, 20px);
-    }
+    touch-action: manipulation;
+}
 
-    #score {
-        font-size: clamp(40px, 12vw, 90px);
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    #timer {
-        font-size: clamp(20px, 5vw, 32px);
-        margin-bottom: 30px;
-    }
+#game {
+    width: 100%;
+    height: 100%;
+    max-width: 900px;
 
-    #tapButton {
-        width: min(70vw, 420px);
-        height: min(70vw, 420px);
-        max-height: 420px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-        border: none;
-        border-radius: 50%;
+    padding: 20px;
+}
 
-        background: #f2c94c;
-        color: #111;
+#mainScreen,
+#result {
+    width: 100%;
+    text-align: center;
+}
 
-        font-size: clamp(30px, 8vw, 60px);
-        font-weight: bold;
+h1 {
+    margin: 0 0 8px;
 
-        cursor: pointer;
+    font-size: clamp(32px, 8vw, 64px);
+}
 
-        box-shadow:
-            0 12px 0 #9c7c16,
-            0 20px 35px rgba(0, 0, 0, 0.5);
+#subtitle {
+    margin-bottom: 25px;
 
-        user-select: none;
-        -webkit-user-select: none;
+    color: #aaa;
 
-        transition:
-            transform 0.05s,
-            box-shadow 0.05s;
-    }
+    font-size: clamp(15px, 3vw, 20px);
+}
 
-    #tapButton:active {
-        transform: translateY(10px) scale(0.96);
-        box-shadow:
-            0 3px 0 #9c7c16,
-            0 8px 20px rgba(0, 0, 0, 0.4);
-    }
+#score {
+    font-size: clamp(45px, 12vw, 90px);
+    font-weight: bold;
 
-    #tapButton:disabled {
-        opacity: 0.5;
-        cursor: default;
-    }
+    margin-bottom: 5px;
+}
 
-    #startButton,
-    #restartButton {
-        margin-top: 25px;
-        padding: 15px 35px;
+#timer {
+    font-size: clamp(20px, 5vw, 32px);
 
-        border: none;
-        border-radius: 12px;
+    margin-bottom: 30px;
+}
 
-        background: white;
-        color: #111;
+#tapButton {
+    width: min(70vw, 420px);
+    height: min(70vw, 420px);
 
-        font-size: 20px;
-        font-weight: bold;
+    border: none;
+    border-radius: 50%;
 
-        cursor: pointer;
-    }
+    background: #f2c94c;
+    color: #111;
 
-    #restartButton {
-        display: none;
-    }
+    font-size: clamp(30px, 8vw, 60px);
+    font-weight: bold;
 
-    #result {
-        display: none;
-        text-align: center;
-    }
+    cursor: pointer;
 
-    #resultTitle {
-        font-size: clamp(28px, 7vw, 50px);
-        margin-bottom: 10px;
-    }
+    box-shadow:
+        0 12px 0 #9c7c16,
+        0 20px 35px rgba(0, 0, 0, 0.5);
 
-    #finalScore {
-        font-size: clamp(45px, 12vw, 90px);
-        font-weight: bold;
-    }
+    user-select: none;
+    -webkit-user-select: none;
 
-    #message {
-        margin-top: 10px;
-        color: #aaa;
-    }
+    transition:
+        transform 0.04s,
+        box-shadow 0.04s;
+}
 
-    .hidden {
-        display: none !important;
-    }
+#tapButton:active {
+    transform: translateY(10px) scale(0.96);
+
+    box-shadow:
+        0 3px 0 #9c7c16,
+        0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+#tapButton:disabled {
+    opacity: 0.5;
+}
+
+#startButton,
+#restartButton {
+    margin-top: 25px;
+
+    padding: 15px 35px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: white;
+    color: #111;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+#restartButton {
+    display: none;
+}
+
+#result {
+    display: none;
+}
+
+#resultTitle {
+    font-size: clamp(28px, 7vw, 50px);
+
+    margin-bottom: 15px;
+}
+
+#finalScore {
+    font-size: clamp(55px, 14vw, 100px);
+
+    font-weight: bold;
+
+    margin-bottom: 20px;
+}
+
+#grade {
+    font-size: clamp(22px, 5vw, 38px);
+
+    font-weight: bold;
+
+    line-height: 1.4;
+
+    min-height: 55px;
+}
+
+#retryText {
+    margin-top: 12px;
+
+    color: #999;
+
+    font-size: 15px;
+}
+
 </style>
+
 </head>
+
 
 <body>
 
@@ -160,21 +195,23 @@
         <h1>Legacy Low Bar</h1>
 
         <div id="subtitle">
-            최대한 빠르게 연타하세요.
+            Ovenbound의 마지막 발악 연습
         </div>
 
-        <div id="score">0</div>
+        <div id="score">
+            0
+        </div>
 
         <div id="timer">
             준비하세요
         </div>
 
         <button id="tapButton" disabled>
-            연타!
+            발악!!
         </button>
 
         <button id="startButton">
-            게임 시작
+            발악 시작
         </button>
 
     </div>
@@ -183,15 +220,19 @@
     <div id="result">
 
         <div id="resultTitle">
-            GAME OVER
+            마지막 발악 종료
         </div>
 
         <div id="finalScore">
             0
         </div>
 
-        <div id="message">
-            회 연타
+        <div id="grade">
+            판정
+        </div>
+
+        <div id="retryText">
+            다시 한번 발악해보시겠습니까?
         </div>
 
         <button id="restartButton">
@@ -204,17 +245,34 @@
 
 
 <script>
-const scoreElement = document.getElementById("score");
-const timerElement = document.getElementById("timer");
 
-const tapButton = document.getElementById("tapButton");
-const startButton = document.getElementById("startButton");
+const scoreElement =
+    document.getElementById("score");
 
-const mainScreen = document.getElementById("mainScreen");
-const resultScreen = document.getElementById("result");
+const timerElement =
+    document.getElementById("timer");
 
-const finalScoreElement = document.getElementById("finalScore");
-const restartButton = document.getElementById("restartButton");
+const tapButton =
+    document.getElementById("tapButton");
+
+const startButton =
+    document.getElementById("startButton");
+
+const mainScreen =
+    document.getElementById("mainScreen");
+
+const resultScreen =
+    document.getElementById("result");
+
+const finalScoreElement =
+    document.getElementById("finalScore");
+
+const gradeElement =
+    document.getElementById("grade");
+
+const restartButton =
+    document.getElementById("restartButton");
+
 
 let score = 0;
 let timeLeft = 10;
@@ -223,10 +281,48 @@ let gameRunning = false;
 let timer = null;
 
 
+/*
+    발악 등급
+*/
+function getGrade(score) {
+
+    if (score < 60) {
+
+        return "발악의 악도 모르시는군요?";
+
+    }
+
+    if (score < 90) {
+
+        return "꽤 못하네요";
+
+    }
+
+    if (score < 110) {
+
+        return "보통은 생긴 것과는 다르게 꽤 치네요";
+
+    }
+
+    if (score < 130) {
+
+        return "발악을 더하세요!! 암암!!!!!!!!";
+
+    }
+
+    return "우.와.정.말.잘.했.어.요.";
+
+}
+
+
+/*
+    게임 시작
+*/
 function startGame() {
 
     score = 0;
     timeLeft = 10;
+
     gameRunning = true;
 
     scoreElement.textContent = "0";
@@ -259,6 +355,9 @@ function startGame() {
 }
 
 
+/*
+    연타
+*/
 function tap() {
 
     if (!gameRunning) {
@@ -268,43 +367,57 @@ function tap() {
     score++;
 
     scoreElement.textContent = score;
+
 }
 
 
+/*
+    게임 종료
+*/
 function endGame() {
 
     gameRunning = false;
 
     clearInterval(timer);
+
     timer = null;
 
     tapButton.disabled = true;
 
     finalScoreElement.textContent = score;
 
+    gradeElement.textContent =
+        getGrade(score);
+
     mainScreen.style.display = "none";
+
     resultScreen.style.display = "block";
 
     restartButton.style.display = "inline-block";
-}
 
-
-function restartGame() {
-
-    resultScreen.style.display = "none";
-    mainScreen.style.display = "block";
-
-    startButton.style.display = "inline-block";
-
-    timerElement.textContent = "준비하세요";
-
-    scoreElement.textContent = "0";
 }
 
 
 /*
-    PC
-    스페이스바로 연타
+    다시하기
+*/
+function restartGame() {
+
+    resultScreen.style.display = "none";
+
+    mainScreen.style.display = "block";
+
+    startButton.style.display = "inline-block";
+
+    scoreElement.textContent = "0";
+
+    timerElement.textContent = "준비하세요";
+
+}
+
+
+/*
+    PC 스페이스바
 */
 document.addEventListener("keydown", (event) => {
 
@@ -312,19 +425,15 @@ document.addEventListener("keydown", (event) => {
 
         event.preventDefault();
 
-        if (!gameRunning) {
-            return;
-        }
-
         tap();
+
     }
 
 });
 
 
 /*
-    PC + 모바일
-    마우스 클릭 / 터치
+    모바일 + PC 마우스
 */
 tapButton.addEventListener("pointerdown", (event) => {
 
@@ -335,6 +444,9 @@ tapButton.addEventListener("pointerdown", (event) => {
 });
 
 
+/*
+    시작
+*/
 startButton.addEventListener("click", () => {
 
     startGame();
@@ -342,25 +454,17 @@ startButton.addEventListener("click", () => {
 });
 
 
+/*
+    재시작
+*/
 restartButton.addEventListener("click", () => {
 
     restartGame();
 
 });
 
-
-/*
-    화면 크기 변경 대응
-*/
-window.addEventListener("resize", () => {
-
-    document.body.style.width = "100%";
-    document.body.style.height = "100%";
-
-});
-
-
 </script>
 
 </body>
-</html>
+
+   </html>
