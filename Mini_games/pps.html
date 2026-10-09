@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>리얼 2D 생체 물리 시뮬레이터 v2.2 - 풀바디 디테일 에디션</title>
+    <title>리얼 2D 생체 물리 시뮬레이터 v2.3 - 탄탄한 바디 에디션</title>
     <style>
         body {
             background-color: #0b0b0e;
@@ -75,7 +75,7 @@
 <body>
 
 <div class="simulator-wrapper">
-    <h2 style="margin-top:0; color:#ff7043; text-shadow: 0 0 10px rgba(255,112,67,0.5);">🔥 리얼 생체 물리 시뮬레이터 v2.2 (풀바디 디테일)</h2>
+    <h2 style="margin-top:0; color:#ff7043; text-shadow: 0 0 10px rgba(255,112,67,0.5);">🔥 리얼 생체 물리 시뮬레이터 v2.3 (탄탄한 바디)</h2>
     
     <canvas id="simCanvas" width="520" height="240"></canvas>
 
@@ -100,7 +100,7 @@
             <button id="btn-rest" onclick="actionRest()" disabled>강제 불응기 (휴식)</button>
         </div>
 
-        <div id="log">[시스템] v2.2 풀바디 에디션 로드 완료. 허벅지와 화려한 헤어 라인업이 적용되었습니다!</div>
+        <div id="log">[시스템] v2.3 탄탄한 바디 에디션 로드. 남녀 하체 및 여성 코어 라인이 강화되었습니다!</div>
     </div>
 </div>
 
@@ -146,6 +146,7 @@
         btnRest.disabled = isDriving || stamina >= 100;
     }
 
+    // 탄탄하게 보강된 캐릭터 렌더링 함수
     function drawScene(thrustOffset = 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -159,89 +160,90 @@
         ctx.strokeStyle = '#ff5722';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(30, 210);
-        ctx.lineTo(490, 210);
+        ctx.moveTo(30, 215);
+        ctx.lineTo(490, 215);
         ctx.stroke();
 
-        // 2. [여성 캐릭터] 튼실한 허벅지 및 머리카락 포함 풀바디 렌더링
+        // 2. [여성 캐릭터] 탄탄한 코어 및 볼륨감 있는 하체 렌더링
         ctx.fillStyle = '#ffcc99'; // 피부톤
         
-        // 여성 머리카락 (풍성한 헤어 실루엣)
+        // 여성 헤어
         ctx.fillStyle = '#6d4c41';
         ctx.beginPath();
-        ctx.arc(85, 155, 20, 0, Math.PI * 2);
+        ctx.arc(80, 152, 22, 0, Math.PI * 2);
         ctx.fill();
 
         // 여성 머리
         ctx.fillStyle = '#ffcc99';
-        ctx.beginPath(); ctx.arc(95, 155, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(92, 152, 18, 0, Math.PI * 2); ctx.fill();
 
-        // 여성 상체 (누운 형태)
+        // [탄탄한 코어] 상체 (기존보다 두께감을 주어 볼륨감 있게 수정)
         ctx.fillStyle = '#ff4081';
-        ctx.fillRect(110, 142, 110, 44);
+        ctx.fillRect(108, 138, 115, 50);
 
-        // 여성 골반/하체
+        // [강화된 골반] 하체 접합부
         ctx.fillStyle = '#e91e63';
         ctx.beginPath();
-        ctx.arc(220, 164, 22, 0, Math.PI * 2);
+        ctx.arc(220, 168, 26, 0, Math.PI * 2);
         ctx.fill();
 
-        // [튼실한 허벅지 라인] 외회전된 볼륨감 있는 다리 폴리곤
+        // [매우 튼실한 허벅지 및 하체 라인] 볼륨감 있는 곡선 수정
         ctx.fillStyle = '#ffcc99';
         ctx.beginPath();
-        ctx.moveTo(220, 175);
-        ctx.quadraticCurveTo(240, 205, 290, 205); // 허벅지 바깥쪽 라인
-        ctx.lineTo(280, 210);
-        ctx.quadraticCurveTo(235, 205, 215, 185); // 허벅지 안쪽 라인
+        ctx.moveTo(218, 180);
+        ctx.quadraticCurveTo(245, 212, 300, 212); // 허벅지 바깥쪽 라인 (두껍게)
+        ctx.lineTo(290, 220);
+        ctx.quadraticCurveTo(235, 215, 212, 192); // 허벅지 안쪽 라인
         ctx.fill();
 
-        // 3. [남성 캐릭터] 머리카락, 하체(다리) 및 밀착 결합 연동
+        // 3. [남성 캐릭터] 굵어진 하체 관절 및 밀착 결합 연동
         ctx.save();
         
-        let baseAnchorX = 215; 
+        let baseAnchorX = 213; 
         let currentMaleX = baseAnchorX - thrustOffset; 
 
-        // 남성 하체/무릎 다리 라인 (바닥을 지지하는 하체 구조)
+        // [강화된 남성 다리/무릎] 바닥 지지선 (굵기 보강)
         ctx.strokeStyle = '#303f9f';
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 14;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(currentMaleX, 170);
-        ctx.lineTo(currentMaleX + 40, 210); // 바닥에 짚은 남성 다리
+        ctx.moveTo(currentMaleX + 5, 174);
+        ctx.lineTo(currentMaleX + 48, 220); // 굵게 지지하는 남성 다리
         ctx.stroke();
 
         // 남성 골반/접합부
         ctx.fillStyle = '#303f9f';
         ctx.beginPath();
-        ctx.arc(currentMaleX, 165, 16, 0, Math.PI * 2);
+        ctx.arc(currentMaleX, 169, 18, 0, Math.PI * 2);
         ctx.fill();
 
         // 남성 상체 (접합부로부터 꺾여 올라가는 구조)
-        ctx.translate(currentMaleX, 165);
-        let tiltAngle = -0.55 + (thrustOffset * 0.012);
+        ctx.translate(currentMaleX, 169);
+        let tiltAngle = -0.5 + (thrustOffset * 0.014);
         ctx.rotate(tiltAngle);
 
+        // [근육질 상체] (두께감 보강)
         ctx.fillStyle = '#3f51b5';
-        ctx.fillRect(-12, -75, 45, 75); // 상체 몸통
+        ctx.fillRect(-14, -80, 50, 80); // 상체 몸통
 
-        // 남성 머리카락
+        // 남성 헤어
         ctx.fillStyle = '#212121';
         ctx.beginPath();
-        ctx.arc(22, -98, 14, 0, Math.PI * 2);
+        ctx.arc(24, -105, 16, 0, Math.PI * 2);
         ctx.fill();
 
         // 남성 머리
         ctx.fillStyle = '#ffcc99';
         ctx.beginPath();
-        ctx.arc(10, -90, 15, 0, Math.PI * 2);
+        ctx.arc(12, -97, 17, 0, Math.PI * 2);
         ctx.fill();
 
         // 남성 팔 (밀착 라인)
         ctx.strokeStyle = '#3f51b5';
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 7;
         ctx.beginPath();
-        ctx.moveTo(10, -40);
-        ctx.lineTo(-40, -10);
+        ctx.moveTo(10, -45);
+        ctx.lineTo(-45, -12);
         ctx.stroke();
 
         ctx.restore();
@@ -278,8 +280,8 @@
 
         for (let i = 0; i < 15; i++) {
             particles.push({
-                x: 220 + (Math.random() - 0.5) * 10,
-                y: 165 + (Math.random() - 0.5) * 10,
+                x: 218 + (Math.random() - 0.5) * 10,
+                y: 169 + (Math.random() - 0.5) * 10,
                 vx: (Math.random() - 0.5) * 5,
                 vy: (Math.random() - 0.5) * 5 - 1.5,
                 size: Math.random() * 3 + 2,
@@ -297,7 +299,7 @@
         if (stamina < 30) {
             addLog("🔥 [과부하] 코어 근육 한계 돌파! 거친 숨소리 및 음성 피드백 출력 중...");
         } else {
-            addLog("⚙️ [풀바디 엔진] 허벅지와 헤어 라인이 연동된 상태로 피스톤 스트로크 구동 중!");
+            addLog("⚙️ [풀바디 엔진] 강화된 하체와 코어 라인이 연동된 상태로 피스톤 스트로크 구동 중!");
         }
 
         updateUI();
