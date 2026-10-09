@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>2D 생체 물리 시뮬레이터 - 프로토타입 v0.2</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            font-family: 'Malgun Gothic', sans-serif;
+            text-align: center;
+            padding-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 2D 캐릭터 뷰어 스타일 */
+        #viewer-container {
+            width: 450px;
+            height: 250px;
+            background: #000;
+            border: 4px solid #555;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .character {
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            bottom: 20px;
+            transition: all 0.1s;
+        }
+
+        #char-female {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150"><path d="M50 10 c10 0, 15 10, 15 25 s-5 25, -15 25 s-15 -10, -15 -25 s5 -25, 15 -25 z" fill="%23ffcc99"/><path d="M35 60 h30 v50 h-30 z" fill="%23ff66cc"/><path d="M30 110 h40 v30 h-40 z" fill="%2399ccff"/></svg>'); /* 여성 심볼릭 이미지 */
+            left: 100px;
+        }
+
+        #char-male {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150"><path d="M50 10 c10 0, 15 10, 15 25 s-5 25, -15 25 s-15 -10, -15 -25 s5 -25, 15 -25 z" fill="%23ffcc99"/><path d="M25 60 h50 v50 h-50 z" fill="%233333cc"/><path d="M30 110 h40 v30 h-40 z" fill="%23666666"/></svg>'); /* 남성 심볼릭 이미지 */
+            left: 250px;
+            transform-origin: bottom center;
+        }
+
+        /* 애니메이션 효과 (CSS Keyframes) */
+        @keyframes drive-anim {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(-5deg); }
+        }
+        
+        @keyframes rest-anim {
+            0%, 100% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(5px) scaleY(0.95); }
+        }
+
+        .driving .character {
+            animation: drive-anim 0.5s infinite;
+        }
+
+        .resting #char-male {
+            animation: rest-anim 1s infinite;
+        }
+
+        /* 각질/분비물 오버레이 */
+        #debris-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent, rgba(255,255,255, 0.5));
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s;
+        }
+
+        /* 메인 UI 스타일 */
+        .container {
+            width: 400px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .gauge-box { margin-bottom: 15px; text-align: left; }
+        .bar-container {
+            width: 100%; background: #444; height: 20px;
+            border-radius: 10px; overflow: hidden; margin-top: 5px;
+            position: relative;
+        }
+        
+        .bar-fill {
+            height: 100%; transition: width 0.1s, background 0.3s;
+        }
+        
+        #stamina-bar { width: 100%; background: #4CAF50; }
+        #debris-bar { width: 0%; background: #ffeb3b; } /* 각질 게이지 */
+
+        .button-group { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button {
+            background: #ff5722; color: white; border: none;
+            padding: 12px 20px; font-size: 16px; border-radius: 5px;
+            cursor: pointer; font-weight: bold; flex: 1;
+        }
+        button:hover { background: #e64a19; }
+        button:disabled { background: #666; cursor: not-allowed; }
+
+        #log {
+            margin-top: 20px; height: 80px; background: #111;
+            border: 1px solid #444; padding: 10px; overflow-y: auto;
+            font-size: 13px; text-align: left; color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 2D 뷰어 영역 -->
+<div id="viewer-container">
+    <div id="char-female" class="character"></div>
+    <div id="char-male" class="character"></div>
+    <div id="debris-overlay"></div>
+</div>
+
+<div class="container">
+    <h2>2D 생체 물리 엔진 시뮬레이터</h2>
+    
+    <div class="gauge-box">
+        <label>ATP (체력/지구력) 게이지:</label>
+        <div class="bar-container">
+            <div id="stamina-bar" class="bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="gauge-box">
+        <label>마찰 각질 발생도:</label>
+        <div class="bar-container">
+            <div id="debris-bar" class="bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button id="btn-drive" onclick="actionDrive()">운동성 구동 (스페이스/클릭)</button>
+        <button id="btn-rest" onclick="actionRest()">쿨다운 / 휴식</button>
+    </div>
+
+    <div id="log">시스템 준비 완료... 시뮬레이션을 시작하세요.</div>
+</div>
+
+<script>
+    let stamina = 100;
+    let debris = 0;
+    let isDriving = false;
+    let 불응기 = false;
+
+    const staminaBar = document.getElementById('stamina-bar');
+    const debrisBar = document.getElementById('debris-bar');
+    const logBox = document.getElementById('log');
+    const viewer = document.getElementById('viewer-container');
+    const debrisOverlay = document.getElementById('debris-overlay');
+    const btnDrive = document.getElementById('btn-drive');
+    const btnRest = document.getElementById('btn-rest');
+
+    function addLog(message) {
+        logBox.innerHTML += `<br>` + message;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function updateUI() {
+        // 체력 바 업데이트
+        staminaBar.style.width = stamina + '%';
+        if (stamina < 30) {
+            staminaBar.style.background = '#f44336';
+        } else {
+            staminaBar.style.background = '#4CAF50';
+        }
+
+        // 각질 바 업데이트
+        debrisBar.style.width = debris + '%';
+        debrisOverlay.style.opacity = debris / 100; // 각질이 쌓이면 오버레이가 진해짐
+
+        // 버튼 상태 업데이트
+        btnDrive.disabled = 불응기 || stamina <= 0;
+        btnRest.disabled = isDriving || stamina >= 100;
+    }
+
+    function actionDrive() {
+        if (불응기 || stamina <= 0) return;
+
+        isDriving = true;
+        viewer.classList.add('driving');
+        viewer.classList.remove('resting');
+
+        // 체력 감소
+        stamina -= 15;
+        if (stamina < 0) stamina = 0;
+
+        // 각질/분비물 증가 (물리적 마찰 발생)
+        debris += 5; // 구동시 각질 5% 증가
+        if (debris > 100) debris = 100;
+
+        if (stamina === 0) {
+            addLog("⚠️ 경고: 에너지 오링! 근육 경련(쥐) 발생! 강제 휴식 모드 진입.");
+            actionRest(); // 자동 휴식 전환
+            return;
+        }
+        
+        if (stamina < 30) {
+            addLog("🔥 경고: 코어 근육 과부하! 거친 숨소리(음성 피드백) 출력 중...");
+        } else {
+            addLog("⚙️ 물리 엔진 구동 중... 마찰 및 각질 발생!");
+        }
+
+        updateUI();
+        
+        // 1초 후 동작 멈춤 시뮬레이션
+        setTimeout(() => {
+            isDriving = false;
+            viewer.classList.remove('driving');
+            updateUI();
+        }, 500);
+    }
+
+    function actionRest() {
+        if (isDriving || stamina >= 100) return;
+        
+        isDriving = false;
+        불응기 = true; // 강제 쿨다운 시작
+        viewer.classList.remove('driving');
+        viewer.classList.add('resting');
+
+        addLog("💤 강제 불응기 및 쿨다운 가동 중... 체력 충전 완료.");
+
+        // 체력 충전 (시간차)
+        let restInterval = setInterval(() => {
+            stamina += 20;
+            if (stamina > 100) stamina = 100;
+            updateUI();
+            
+            if (stamina >= 100) {
+                clearInterval(restInterval);
+                불응기 = false; // 불응기 해제
+                viewer.classList.remove('resting');
+                addLog("✅ 생체 시스템 리프레시 완료. 재구동 가능.");
+                updateUI();
+            }
+        }, 1000);
+        
+        // 각질 제거(?)는 샤워 단계라 생략
+        // debris = Math.max(0, debris - 10); // 휴식해도 각질은 안 줄어든다는 설정 ㅋㅋㅋ
+        
+        updateUI();
+    }
+
+    // 키보드 스페이스바 이벤트 추가
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            actionDrive();
+        }
+    });
+
+    updateUI();
+</script>
+
+</body>
+</html>
