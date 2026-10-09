@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>리얼 2D 생체 물리 시뮬레이터 v2.1 - 밀착 결합 에디션</title>
+    <title>리얼 2D 생체 물리 시뮬레이터 v2.2 - 풀바디 디테일 에디션</title>
     <style>
         body {
             background-color: #0b0b0e;
@@ -75,7 +75,7 @@
 <body>
 
 <div class="simulator-wrapper">
-    <h2 style="margin-top:0; color:#ff7043; text-shadow: 0 0 10px rgba(255,112,67,0.5);">🔥 리얼 생체 물리 시뮬레이터 v2.1 (밀착 결합)</h2>
+    <h2 style="margin-top:0; color:#ff7043; text-shadow: 0 0 10px rgba(255,112,67,0.5);">🔥 리얼 생체 물리 시뮬레이터 v2.2 (풀바디 디테일)</h2>
     
     <canvas id="simCanvas" width="520" height="240"></canvas>
 
@@ -100,7 +100,7 @@
             <button id="btn-rest" onclick="actionRest()" disabled>강제 불응기 (휴식)</button>
         </div>
 
-        <div id="log">[시스템] v2.1 밀착 결합 엔진 로드 완료. 스페이스바를 눌러 확인하세요!</div>
+        <div id="log">[시스템] v2.2 풀바디 에디션 로드 완료. 허벅지와 헤어 라인업이 적용되었습니다!</div>
     </div>
 </div>
 
@@ -146,7 +146,6 @@
         btnRest.disabled = isDriving || stamina >= 100;
     }
 
-    // 완전히 밀착 결합된 캐릭터 관절 렌더링 함수
     function drawScene(thrustOffset = 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -160,50 +159,84 @@
         ctx.strokeStyle = '#ff5722';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(30, 205);
-        ctx.lineTo(490, 205);
+        ctx.moveTo(30, 210);
+        ctx.lineTo(490, 210);
         ctx.stroke();
 
-        // 2. [밀착 결합 구조] 여성 캐릭터 (하체 고정, 상체가 미세하게 연동됨)
+        // 2. [여성 캐릭터] 튼실한 허벅지 및 머리카락 포함 풀바디 렌더링
         ctx.fillStyle = '#ffcc99'; // 피부톤
-        // 여성 머리 (누운 위치)
-        ctx.beginPath(); ctx.arc(100, 160, 16, 0, Math.PI * 2); ctx.fill();
-        // 여성 몸통 (누운 형태)
-        ctx.fillStyle = '#ff4081';
-        ctx.fillRect(115, 148, 120, 42);
-        // 여성 골반/하체 부위 (남성과 맞닿는 중심 좌표)
-        ctx.fillStyle = '#e91e63';
+        
+        // 여성 머리카락 (풍성한 헤어 실루엣)
+        ctx.fillStyle = '#6d4c41';
         ctx.beginPath();
-        ctx.arc(235, 169, 20, 0, Math.PI * 2);
+        ctx.arc(85, 155, 20, 0, Math.PI * 2);
         ctx.fill();
 
-        // 3. [밀착 결합 구조] 남성 캐릭터 (여성의 골반 중심점에 상체가 완전히 밀착되어 연동 왕복)
+        // 여성 머리
+        ctx.fillStyle = '#ffcc99';
+        ctx.beginPath(); ctx.arc(95, 155, 16, 0, Math.PI * 2); ctx.fill();
+
+        // 여성 상체 (누운 형태)
+        ctx.fillStyle = '#ff4081';
+        ctx.fillRect(110, 142, 110, 44);
+
+        // 여성 골반/하체
+        ctx.fillStyle = '#e91e63';
+        ctx.beginPath();
+        ctx.arc(220, 164, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        // [튼실한 허벅지 라인] 외회전된 볼륨감 있는 다리 폴리곤
+        ctx.fillStyle = '#ffcc99';
+        ctx.beginPath();
+        ctx.moveTo(220, 175);
+        ctx.quadraticCurveTo(240, 205, 290, 205); // 허벅지 바깥쪽 라인
+        ctx.lineTo(280, 210);
+        ctx.quadraticCurveTo(235, 205, 215, 185); // 허벅지 안쪽 라인
+        ctx.fill();
+
+        // 3. [남성 캐릭터] 머리카락, 하체(다리) 및 밀착 결합 연동
         ctx.save();
         
-        // thrustOffset에 따라 남성의 상체가 여성의 중심점과 완전히 맞물린 채로 앞뒤로 전진/후퇴
-        let baseAnchorX = 225; 
+        let baseAnchorX = 215; 
         let currentMaleX = baseAnchorX - thrustOffset; 
 
-        // 남성 골반/접합부 (여성과 완벽히 밀착)
+        // 남성 하체/무릎 다리 라인 (바닥을 지지하는 하체 구조)
+        ctx.strokeStyle = '#303f9f';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(currentMaleX, 170);
+        ctx.lineTo(currentMaleX + 40, 210); // 바닥에 짚은 남성 다리
+        ctx.stroke();
+
+        // 남성 골반/접합부
         ctx.fillStyle = '#303f9f';
         ctx.beginPath();
         ctx.arc(currentMaleX, 165, 16, 0, Math.PI * 2);
         ctx.fill();
 
-        // 남성 상체 (접합부로부터 위쪽으로 꺾여서 올라가는 각도 구조)
+        // 남성 상체 (접합부로부터 꺾여 올라가는 구조)
         ctx.translate(currentMaleX, 165);
-        // 구동 시 상체도 미세하게 회전 및 떨림 연동
-        let tiltAngle = -0.6 + (thrustOffset * 0.01);
+        let tiltAngle = -0.55 + (thrustOffset * 0.012);
         ctx.rotate(tiltAngle);
 
         ctx.fillStyle = '#3f51b5';
         ctx.fillRect(-12, -75, 45, 75); // 상체 몸통
 
+        // 남성 머리카락
+        ctx.fillStyle = '#212121';
+        ctx.beginPath();
+        ctx.arc(22, -98, 14, 0, Math.PI * 2);
+        ctx.fill();
+
         // 남성 머리
         ctx.fillStyle = '#ffcc99';
-        ctx.beginPath(); ctx.arc(10, -90, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(10, -90, 15, 0, Math.PI * 2);
+        ctx.fill();
 
-        // 남성 팔 (여성 몸을 감싸 안은 밀착 라인)
+        // 남성 팔 (밀착 라인)
         ctx.strokeStyle = '#3f51b5';
         ctx.lineWidth = 6;
         ctx.beginPath();
@@ -243,10 +276,9 @@
         fluid += 12;
         if (fluid > 100) fluid = 100;
 
-        // 접합부 중앙에서 파티클이 밀착되어 튀어나오도록 설정
         for (let i = 0; i < 15; i++) {
             particles.push({
-                x: 235 + (Math.random() - 0.5) * 10,
+                x: 220 + (Math.random() - 0.5) * 10,
                 y: 165 + (Math.random() - 0.5) * 10,
                 vx: (Math.random() - 0.5) * 5,
                 vy: (Math.random() - 0.5) * 5 - 1.5,
@@ -265,27 +297,25 @@
         if (stamina < 30) {
             addLog("🔥 [과부하] 코어 근육 한계 돌파! 거친 숨소리 및 음성 피드백 출력 중...");
         } else {
-            addLog("⚙️ [밀착 물리 엔진] 두 캐릭터가 완전히 결합된 상태로 피스톤 스트로크 구동 중!");
+            addLog("⚙️ [풀바디 엔진] 허벅지와 헤어 라인이 연동된 상태로 피스톤 스트로크 구동 중!");
         }
 
         updateUI();
-        triggerCloseContactAnimation();
+        triggerFullBodyAnimation();
     }
 
-    // 밀착 결합 상태에서 뼈대가 함께 연동되는 피스톤 스트로크 애니메이션
-    function triggerCloseContactAnimation() {
+    function triggerFullBodyAnimation() {
         let step = 0;
         let maxSteps = 6;
         let interval = setInterval(() => {
             step++;
-            // 완벽하게 밀착된 상태로 앞뒤로 왕복하는 오프셋 계산
             let offset = Math.sin(step * 1.2) * 14;
             drawScene(offset);
 
             if (step >= maxSteps) {
                 clearInterval(interval);
                 isDriving = false;
-                drawScene(0); // 제자리 밀착 기본 자세 복귀
+                drawScene(0);
             }
         }, 40);
     }
@@ -318,7 +348,6 @@
         }
     });
 
-    // 초기 결합 자세 렌더링
     drawScene(0);
     updateUI();
 </script>
