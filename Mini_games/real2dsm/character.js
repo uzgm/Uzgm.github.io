@@ -1,4 +1,4 @@
-// character.js - 진짜 사람 같은 관절 + 슈퍼 메가 굵기 하체 모듈
+// character.js - 진짜 사람 같은 관절 + 슈퍼 메가 굵기 하체 모듈 이다 
 
 export class BioCharacterSystem {
     constructor(ctx) {
